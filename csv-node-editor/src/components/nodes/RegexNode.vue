@@ -27,18 +27,26 @@
         <span>Ergebnis</span>
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
+
+      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Handle, Position } from '@vue-flow/core'
+import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 
-defineProps<NodeProps<{
+const props = defineProps<NodeProps<{
   pattern: string
   replacement: string
   mode: 'match' | 'replace'
   flags: string
 }>>()
+
+const { removeNodes } = useVueFlow()
+
+function deleteNode() {
+  removeNodes([props.id])
+}
 </script>

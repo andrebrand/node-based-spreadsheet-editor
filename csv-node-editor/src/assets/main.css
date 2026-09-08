@@ -31,6 +31,8 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .add-column { display: flex; gap: 4px; margin-bottom: 8px; }
 .add-column input { flex: 1; }
 .remove-btn { border: none; background: transparent; color: red; cursor: pointer; font-weight: bold; }
+.delete-node-btn { width: 100%; padding: 5px; border: 1px solid #fecaca; border-radius: 4px; background: #fff1f2; color: #b91c1c; cursor: pointer; font-size: 11px; }
+.delete-node-btn:hover { background: #ffe4e6; }
 
 /* Table Styling */
 table { width: 100%; border-collapse: collapse; font-size: 12px; }

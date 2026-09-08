@@ -7,6 +7,8 @@
       v-model:nodes="nodes"
       v-model:edges="edges"
       :node-types="nodeTypes"
+      :delete-key-code="['Backspace', 'Delete']"
+      @connect="onConnect"
       fit-view-on-init
     >
       <Background />
@@ -17,7 +19,8 @@
 
 <script setup lang="ts">
 import { markRaw } from 'vue'
-import { VueFlow } from '@vue-flow/core'
+import { addEdge, VueFlow } from '@vue-flow/core'
+import type { Connection, Edge } from '@vue-flow/core'
 import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -31,6 +34,10 @@ const nodeTypes: NodeTypesObject = {
   input: markRaw(InputNode),
   output: markRaw(OutputNode),
   regex: markRaw(RegexNode)
+}
+
+function onConnect(connection: Connection) {
+  edges.value = addEdge(connection, edges.value as Edge[]) as Edge[]
 }
 
 function addRegexNode() {

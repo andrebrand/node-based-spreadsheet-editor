@@ -6,16 +6,23 @@
         <span>{{ header }}</span>
         <Handle :id="header" type="source" :position="Position.Right" />
       </div>
+      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Handle, Position } from '@vue-flow/core'
+import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 
-defineProps<NodeProps<{
+const props = defineProps<NodeProps<{
   fileName: string
   headers: string[]
 }>>()
+
+const { removeNodes } = useVueFlow()
+
+function deleteNode() {
+  removeNodes([props.id])
+}
 </script>
