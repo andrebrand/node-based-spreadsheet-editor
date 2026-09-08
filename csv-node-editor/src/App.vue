@@ -119,6 +119,7 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
   const nodeList = nodes.value as Node<any>[]
   const inputNode = nodeList.find((node) => node.id === 'node_input')
   const outputNode = nodeList.find((node) => node.id === 'node_output')
+  const isNewGraph = !inputNode && !outputNode
   const previousHeaders = rawData.value.headers
   const headerSet = new Set(headers)
   const validEdges: Edge[] = []
@@ -137,6 +138,18 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
 
     if (sourceStillExists && targetStillExists) validEdges.push(edge)
   })
+
+  if (isNewGraph) {
+    headers.forEach((header) => {
+      validEdges.push({
+        id: `edge-input-${header}-output-${header}`,
+        source: 'node_input',
+        target: 'node_output',
+        sourceHandle: header,
+        targetHandle: `target-${header}`
+      })
+    })
+  }
 
   const nextNodes = nodeList.filter((node) => node.id !== 'node_input' && node.id !== 'node_output')
   nextNodes.unshift({
