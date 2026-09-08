@@ -10,6 +10,7 @@
           <button @click="addRegexNode(); closeMenu()">+ RegEx Node</button>
           <button @click="addStringNode(); closeMenu()">+ String Node</button>
           <button @click="addCombineStringsNode(); closeMenu()">+ Combine Strings Node</button>
+          <button @click="addCounterNode(); closeMenu()">+ Counter Node</button>
         </div>
       </div>
       <div class="node-menu">
@@ -57,6 +58,7 @@ import StringNode from './nodes/StringNode.vue'
 import CombineStringsNode from './nodes/CombineStringsNode.vue'
 import JoinNode from './nodes/JoinNode.vue'
 import SplitNode from './nodes/SplitNode.vue'
+import CounterNode from './nodes/CounterNode.vue'
 
 const props = defineProps<{
   onInputDelete: () => void
@@ -79,7 +81,8 @@ const nodeTypes: NodeTypesObject = {
   string: markRaw(StringNode),
   combine: markRaw(CombineStringsNode),
   join: markRaw(JoinNode),
-  split: markRaw(SplitNode)
+  split: markRaw(SplitNode),
+  counter: markRaw(CounterNode)
 }
 
 function isValidConnection(connection: Connection) {
@@ -174,6 +177,17 @@ function addSplitNode() {
     label: 'Split',
     position: { x: 850, y: 550 },
     data: { outputCount: 2 }
+  })
+}
+
+function addCounterNode() {
+  const id = `counter_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'counter',
+    label: 'Counter',
+    position: { x: 350, y: 550 },
+    data: { startMode: 'manual', startValue: 0, step: 1 }
   })
 }
 </script>

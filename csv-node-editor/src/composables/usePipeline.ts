@@ -49,6 +49,23 @@ export const outputTable = computed(() => {
       return rawData.value.rows.map(() => value)
     }
 
+    // Counter Node: Erzeugt pro Zeile einen fortlaufenden String-Wert
+    if (sourceNode.type === 'counter') {
+      const step = Number(sourceNode.data?.step ?? 1)
+      const increment = Number.isFinite(step) ? step : 1
+      let startValues = rawData.value.rows.map(() => Number(sourceNode.data?.startValue ?? 0))
+
+      if (sourceNode.data?.startMode === 'input') {
+        const inputValues = getStreamForHandle(sourceNode.id, 'start')
+        startValues = inputValues.map((value) => {
+          const parsed = Number(value)
+          return Number.isFinite(parsed) ? parsed : 0
+        })
+      }
+
+      return startValues.map((startValue, index) => String(startValue + index * increment))
+    }
+
     // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
     if (sourceNode.type === 'combine') {
       const string1 = getStreamForHandle(sourceNode.id, 'string1')
