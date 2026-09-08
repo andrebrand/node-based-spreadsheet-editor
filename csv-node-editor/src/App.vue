@@ -3,6 +3,9 @@
     <header class="app-header">
       <h2>CSV/Excel Node Editor</h2>
       <input ref="fileInput" type="file" accept=".csv, .xlsx, .xls" @change="handleFileUpload" />
+      <button class="save-plan-btn" type="button" @click="savePlan">Plan speichern</button>
+      <button class="load-plan-btn" type="button" @click="planFileInput?.click()">Plan laden</button>
+      <input ref="planFileInput" class="hidden-file-input" type="file" accept=".json" @change="handlePlanLoad" />
     </header>
 
     <div class="main-content">
@@ -25,6 +28,7 @@ import type { Edge, Node } from '@vue-flow/core'
 import { rawData, nodes, edges } from './composables/usePipeline'
 
 const fileInput = ref<HTMLInputElement | null>(null)
+const planFileInput = ref<HTMLInputElement | null>(null)
 const flowKey = ref(0)
 
 function resetApp() {
@@ -36,6 +40,60 @@ function resetApp() {
   edges.value = []
   nodes.value = []
   if (fileInput.value) fileInput.value.value = ''
+  if (planFileInput.value) planFileInput.value.value = ''
+}
+
+function savePlan() {
+  const plan = {
+    version: 1,
+    fileName: rawData.value.fileName,
+    headers: rawData.value.headers,
+    rows: rawData.value.rows,
+    nodes: nodes.value,
+    edges: edges.value
+  }
+  const blob = new Blob([JSON.stringify(plan, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${rawData.value.fileName.replace(/\.[^.]+$/, '') || 'csv-node-plan'}.json`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+function handlePlanLoad(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    try {
+      const plan = JSON.parse(String(reader.result))
+      if (!Array.isArray(plan.nodes) || !Array.isArray(plan.edges) || !Array.isArray(plan.headers)) {
+        throw new Error('Ungültiges Planformat')
+      }
+
+      const loadedNodes = (plan.nodes as Node<any>[]).map((node) => {
+        if (node.id !== 'node_input') return node
+        return {
+          ...node,
+          data: { ...node.data, onDelete: resetApp }
+        }
+      })
+
+      rawData.value = {
+        fileName: typeof plan.fileName === 'string' ? plan.fileName : '',
+        headers: plan.headers,
+        rows: Array.isArray(plan.rows) ? plan.rows : []
+      }
+      edges.value = plan.edges as Edge[]
+      nodes.value = loadedNodes
+      flowKey.value += 1
+    } catch {
+      window.alert('Der Plan konnte nicht geladen werden.')
+    }
+  }
+  reader.readAsText(file)
 }
 
 function handleFileUpload(event: Event) {

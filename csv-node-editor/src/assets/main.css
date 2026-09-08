@@ -7,6 +7,11 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 
 .app-layout { display: flex; flex-direction: column; height: 100vh; }
 .app-header { height: 60px; background: #1e293b; color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+.save-plan-btn { padding: 8px 12px; border: 0; border-radius: 4px; background: #0f766e; color: white; cursor: pointer; }
+.save-plan-btn:hover { background: #115e59; }
+.load-plan-btn { padding: 8px 12px; border: 0; border-radius: 4px; background: #2563eb; color: white; cursor: pointer; }
+.load-plan-btn:hover { background: #1d4ed8; }
+.hidden-file-input { display: none; }
 
 .main-content { display: flex; flex: 1; height: calc(100vh - 60px); }
 .editor-pane { flex: 6; border-right: 2px solid #ccc; position: relative; }

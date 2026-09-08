@@ -122,7 +122,9 @@ function onConnect(connection: Connection) {
 }
 
 function onNodesChange(changes: NodeChange[]) {
-  if (changes.some((change) => change.type === 'remove' && change.id === 'node_input')) {
+  const nodeList = nodes.value as Array<{ id: string }>
+  const inputStillExists = nodeList.some((node) => node.id === 'node_input')
+  if (!inputStillExists && changes.some((change) => change.type === 'remove' && change.id === 'node_input')) {
     props.onInputDelete()
   }
 }
