@@ -1,11 +1,27 @@
 <template>
   <div class="editor-container">
     <div class="toolbar">
-      <button @click="addRegexNode">+ RegEx Node hinzufügen</button>
-      <button @click="addStringNode">+ String Node hinzufügen</button>
-      <button @click="addCombineStringsNode">+ Combine Strings Node hinzufügen</button>
-      <button @click="addJoinNode">+ Join Node hinzufügen</button>
-      <button @click="addSplitNode">+ Split Node hinzufügen</button>
+      <div class="node-menu">
+        <button class="node-menu-toggle" type="button" :aria-expanded="openMenu === 'strings'" @click="toggleMenu('strings')">
+          <span>Strings</span>
+          <span class="menu-chevron" :class="{ open: openMenu === 'strings' }" aria-hidden="true"></span>
+        </button>
+        <div v-if="openMenu === 'strings'" class="node-menu-items">
+          <button @click="addRegexNode(); closeMenu()">+ RegEx Node</button>
+          <button @click="addStringNode(); closeMenu()">+ String Node</button>
+          <button @click="addCombineStringsNode(); closeMenu()">+ Combine Strings Node</button>
+        </div>
+      </div>
+      <div class="node-menu">
+        <button class="node-menu-toggle array-menu-toggle" type="button" :aria-expanded="openMenu === 'arrays'" @click="toggleMenu('arrays')">
+          <span>Array Functions</span>
+          <span class="menu-chevron" :class="{ open: openMenu === 'arrays' }" aria-hidden="true"></span>
+        </button>
+        <div v-if="openMenu === 'arrays'" class="node-menu-items">
+          <button @click="addJoinNode(); closeMenu()">+ Join Node</button>
+          <button @click="addSplitNode(); closeMenu()">+ Split Node</button>
+        </div>
+      </div>
     </div>
     <VueFlow
       v-model:nodes="nodes"
@@ -25,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { markRaw } from 'vue'
 import { addEdge, ConnectionMode, VueFlow } from '@vue-flow/core'
 import type { Connection, Edge, NodeChange } from '@vue-flow/core'
@@ -44,6 +61,16 @@ import SplitNode from './nodes/SplitNode.vue'
 const props = defineProps<{
   onInputDelete: () => void
 }>()
+
+const openMenu = ref<'strings' | 'arrays' | null>(null)
+
+function toggleMenu(menu: 'strings' | 'arrays') {
+  openMenu.value = openMenu.value === menu ? null : menu
+}
+
+function closeMenu() {
+  openMenu.value = null
+}
 
 const nodeTypes: NodeTypesObject = {
   input: markRaw(InputNode),
