@@ -3,6 +3,7 @@
     <div class="toolbar">
       <button @click="addRegexNode">+ RegEx Node hinzufügen</button>
       <button @click="addStringNode">+ String Node hinzufügen</button>
+      <button @click="addCombineStringsNode">+ Combine Strings Node hinzufügen</button>
     </div>
     <VueFlow
       v-model:nodes="nodes"
@@ -33,12 +34,14 @@ import InputNode from './nodes/InputNode.vue'
 import OutputNode from './nodes/OutputNode.vue'
 import RegexNode from './nodes/RegexNode.vue'
 import StringNode from './nodes/StringNode.vue'
+import CombineStringsNode from './nodes/CombineStringsNode.vue'
 
 const nodeTypes: NodeTypesObject = {
   input: markRaw(InputNode),
   output: markRaw(OutputNode),
   regex: markRaw(RegexNode),
-  string: markRaw(StringNode)
+  string: markRaw(StringNode),
+  combine: markRaw(CombineStringsNode)
 }
 
 function isValidConnection(connection: Connection) {
@@ -77,6 +80,17 @@ function addStringNode() {
     label: 'String',
     position: { x: 350, y: 350 },
     data: { value: '' }
+  })
+}
+
+function addCombineStringsNode() {
+  const id = `combine_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'combine',
+    label: 'Combine Strings',
+    position: { x: 600, y: 350 },
+    data: {}
   })
 }
 </script>

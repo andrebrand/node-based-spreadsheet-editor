@@ -49,6 +49,17 @@ export const outputTable = computed(() => {
       return rawData.value.rows.map(() => value)
     }
 
+    // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
+    if (sourceNode.type === 'combine') {
+      const string1 = getStreamForHandle(sourceNode.id, 'string1')
+      const string2 = getStreamForHandle(sourceNode.id, 'string2')
+      const separator = getStreamForHandle(sourceNode.id, 'separator')
+
+      return rawData.value.rows.map((_, index) => (
+        `${String(string1[index] ?? '')}${String(separator[index] ?? '')}${String(string2[index] ?? '')}`
+      ))
+    }
+
     // 2. Regex Node: Transformiert die Eingabe
     if (sourceNode.type === 'regex') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input')
