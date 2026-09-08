@@ -43,6 +43,12 @@ export const outputTable = computed(() => {
       return rawData.value.rows.map((r) => r[colName] ?? '')
     }
 
+    // String Node: Liefert denselben festen Wert für jede Datenzeile
+    if (sourceNode.type === 'string') {
+      const value = sourceNode.data?.value ?? ''
+      return rawData.value.rows.map(() => value)
+    }
+
     // 2. Regex Node: Transformiert die Eingabe
     if (sourceNode.type === 'regex') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input')

@@ -2,6 +2,7 @@
   <div class="editor-container">
     <div class="toolbar">
       <button @click="addRegexNode">+ RegEx Node hinzufügen</button>
+      <button @click="addStringNode">+ String Node hinzufügen</button>
     </div>
     <VueFlow
       v-model:nodes="nodes"
@@ -31,11 +32,13 @@ import { nodes, edges } from '../composables/usePipeline'
 import InputNode from './nodes/InputNode.vue'
 import OutputNode from './nodes/OutputNode.vue'
 import RegexNode from './nodes/RegexNode.vue'
+import StringNode from './nodes/StringNode.vue'
 
 const nodeTypes: NodeTypesObject = {
   input: markRaw(InputNode),
   output: markRaw(OutputNode),
-  regex: markRaw(RegexNode)
+  regex: markRaw(RegexNode),
+  string: markRaw(StringNode)
 }
 
 function isValidConnection(connection: Connection) {
@@ -63,6 +66,17 @@ function addRegexNode() {
     label: 'Regex',
     position: { x: 350, y: 150 },
     data: { pattern: '', replacement: '', mode: 'match', flags: 'g' }
+  })
+}
+
+function addStringNode() {
+  const id = `string_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'string',
+    label: 'String',
+    position: { x: 350, y: 350 },
+    data: { value: '' }
   })
 }
 </script>
