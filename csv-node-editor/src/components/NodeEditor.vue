@@ -7,6 +7,8 @@
       v-model:nodes="nodes"
       v-model:edges="edges"
       :node-types="nodeTypes"
+      :connection-mode="ConnectionMode.Strict"
+      :is-valid-connection="isValidConnection"
       :delete-key-code="['Backspace', 'Delete']"
       @connect="onConnect"
       fit-view-on-init
@@ -19,7 +21,7 @@
 
 <script setup lang="ts">
 import { markRaw } from 'vue'
-import { addEdge, VueFlow } from '@vue-flow/core'
+import { addEdge, ConnectionMode, VueFlow } from '@vue-flow/core'
 import type { Connection, Edge } from '@vue-flow/core'
 import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
@@ -36,8 +38,21 @@ const nodeTypes: NodeTypesObject = {
   regex: markRaw(RegexNode)
 }
 
+function isValidConnection(connection: Connection) {
+  return Boolean(connection.sourceHandle && connection.targetHandle)
+}
+
 function onConnect(connection: Connection) {
-  edges.value = addEdge(connection, edges.value as Edge[]) as Edge[]
+  const existingEdges = edges.value as Edge[]
+  const remainingEdges: Edge[] = []
+
+  existingEdges.forEach((edge) => {
+    if (edge.target !== connection.target || edge.targetHandle !== connection.targetHandle) {
+      remainingEdges.push(edge)
+    }
+  })
+
+  edges.value = addEdge(connection, remainingEdges) as Edge[]
 }
 
 function addRegexNode() {
