@@ -31,8 +31,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Handle, Position } from '@vue-flow/core'
+import { nextTick, ref } from 'vue'
+import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { Edge, NodeProps } from '@vue-flow/core'
 import { edges } from '../../composables/usePipeline'
 
@@ -43,6 +43,11 @@ const props = defineProps<NodeProps<{
 const newCol = ref('')
 const draggedColumn = ref<string | null>(null)
 const dragOverColumn = ref<string | null>(null)
+const { updateNodeInternals } = useVueFlow()
+
+function refreshConnections() {
+  nextTick(() => updateNodeInternals([props.id]))
+}
 
 function startColumnDrag(col: string) {
   draggedColumn.value = col
@@ -65,6 +70,7 @@ function moveColumn(targetCol: string) {
 function finishColumnDrag() {
   draggedColumn.value = null
   dragOverColumn.value = null
+  refreshConnections()
 }
 
 function addColumn() {
@@ -73,6 +79,7 @@ function addColumn() {
     props.data.columns.push(newCol.value.trim())
   }
   newCol.value = ''
+  refreshConnections()
 }
 
 function removeColumn(col: string) {
@@ -87,5 +94,6 @@ function removeColumn(col: string) {
   })
   edges.value = remainingEdges
   props.data.columns.splice(idx, 1)
+  refreshConnections()
 }
 </script>
