@@ -25,6 +25,7 @@
       </div>
     </div>
     <VueFlow
+      :key="flowKey"
       v-model:nodes="nodes"
       v-model:edges="edges"
       :node-types="nodeTypes"
@@ -61,6 +62,7 @@ import SplitNode from './nodes/SplitNode.vue'
 import CounterNode from './nodes/CounterNode.vue'
 
 const props = defineProps<{
+  flowKey: number
   onInputDelete: () => void
 }>()
 
