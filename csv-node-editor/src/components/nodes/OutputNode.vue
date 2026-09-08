@@ -23,7 +23,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
-import type { NodeProps } from '@vue-flow/core'
+import type { Edge, NodeProps } from '@vue-flow/core'
+import { edges } from '../../composables/usePipeline'
 
 const props = defineProps<NodeProps<{
   columns: string[]
@@ -41,6 +42,15 @@ function addColumn() {
 
 function removeColumn(col: string) {
   const idx = props.data.columns.indexOf(col)
-  if (idx !== -1) props.data.columns.splice(idx, 1)
+  if (idx === -1) return
+
+  const handleId = `target-${col}`
+  const edgeList = edges.value as Edge[]
+  const remainingEdges: Edge[] = []
+  edgeList.forEach((edge) => {
+    if (edge.targetHandle !== handleId) remainingEdges.push(edge)
+  })
+  edges.value = remainingEdges
+  props.data.columns.splice(idx, 1)
 }
 </script>
