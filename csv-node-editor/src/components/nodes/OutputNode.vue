@@ -7,6 +7,7 @@
           v-model="newCol" 
           placeholder="Neue Spalte..." 
           @keyup.enter="addColumn" 
+          @paste.prevent="pasteColumns"
         />
         <button @click="addColumn">+</button>
       </div>
@@ -80,6 +81,36 @@ function addColumn() {
   }
   newCol.value = ''
   refreshConnections()
+}
+
+async function pasteColumns(event: ClipboardEvent) {
+  try {
+    const clipboardText = event.clipboardData?.getData('text') ?? ''
+    const columns = [...new Set(
+      clipboardText
+        .split(/[\t\r\n]+/)
+        .map((column) => column.trim())
+        .filter(Boolean)
+    )]
+
+    if (!columns.length) return
+
+    const columnHandles = new Set(columns.map((column) => `target-${column}`))
+    const edgeList = edges.value as Edge[]
+    const remainingEdges: Edge[] = []
+    edgeList.forEach((edge) => {
+      if (edge.target !== props.id || columnHandles.has(edge.targetHandle ?? '')) {
+        remainingEdges.push(edge)
+      }
+    })
+
+    props.data.columns.splice(0, props.data.columns.length, ...columns)
+    newCol.value = ''
+    edges.value = remainingEdges
+    refreshConnections()
+  } catch {
+    window.alert('Die Zwischenablage konnte nicht gelesen werden.')
+  }
 }
 
 function removeColumn(col: string) {
