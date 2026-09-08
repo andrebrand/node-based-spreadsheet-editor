@@ -60,6 +60,29 @@ export const outputTable = computed(() => {
       ))
     }
 
+    // Join Node: Sammelt beliebig viele String-Streams zu einem Array pro Zeile
+    if (sourceNode.type === 'join') {
+      const inputCount = sourceNode.data?.inputCount || 0
+      const inputStreams = Array.from({ length: inputCount }, (_, index) => (
+        getStreamForHandle(sourceNode.id, `input-${index}`)
+      ))
+
+      return rawData.value.rows.map((_, rowIndex) => (
+        inputStreams.map((stream) => String(stream[rowIndex] ?? ''))
+      ))
+    }
+
+    // Split Node: Gibt ein Array-Element als String-Stream aus
+    if (sourceNode.type === 'split') {
+      const inputStream = getStreamForHandle(sourceNode.id, 'input')
+      const outputIndex = Number((edge.sourceHandle ?? '').replace('output-', ''))
+
+      return inputStream.map((value) => {
+        if (!Array.isArray(value)) return ''
+        return String(value[outputIndex] ?? '')
+      })
+    }
+
     // 2. Regex Node: Transformiert die Eingabe
     if (sourceNode.type === 'regex') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input')
