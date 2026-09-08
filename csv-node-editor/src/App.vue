@@ -2,12 +2,12 @@
   <div class="app-layout">
     <header class="app-header">
       <h2>CSV/Excel Node Editor</h2>
-      <input type="file" accept=".csv, .xlsx, .xls" @change="handleFileUpload" />
+      <input ref="fileInput" type="file" accept=".csv, .xlsx, .xls" @change="handleFileUpload" />
     </header>
 
     <div class="main-content">
       <div class="editor-pane">
-        <NodeEditor />
+        <NodeEditor :on-input-delete="resetApp" />
       </div>
       <div class="preview-pane">
         <TablePreview />
@@ -20,7 +20,21 @@
 import * as XLSX from 'xlsx'
 import NodeEditor from './components/NodeEditor.vue'
 import TablePreview from './components/TablePreview.vue'
+import { ref } from 'vue'
 import { rawData, nodes, edges } from './composables/usePipeline'
+
+const fileInput = ref<HTMLInputElement | null>(null)
+
+function resetApp() {
+  rawData.value = {
+    fileName: '',
+    headers: [],
+    rows: []
+  }
+  edges.value = []
+  nodes.value = []
+  if (fileInput.value) fileInput.value.value = ''
+}
 
 function handleFileUpload(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
@@ -49,7 +63,7 @@ function handleFileUpload(event: Event) {
         id: 'node_input',
         type: 'input',
         position: { x: 50, y: 100 },
-        data: { fileName: file.name, headers }
+        data: { fileName: file.name, headers, onDelete: resetApp }
       },
       {
         id: 'node_output',

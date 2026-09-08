@@ -13,6 +13,7 @@
       :is-valid-connection="isValidConnection"
       :delete-key-code="['Backspace', 'Delete']"
       @connect="onConnect"
+      @nodes-change="onNodesChange"
       fit-view-on-init
     >
       <Background />
@@ -24,7 +25,7 @@
 <script setup lang="ts">
 import { markRaw } from 'vue'
 import { addEdge, ConnectionMode, VueFlow } from '@vue-flow/core'
-import type { Connection, Edge } from '@vue-flow/core'
+import type { Connection, Edge, NodeChange } from '@vue-flow/core'
 import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -35,6 +36,10 @@ import OutputNode from './nodes/OutputNode.vue'
 import RegexNode from './nodes/RegexNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import CombineStringsNode from './nodes/CombineStringsNode.vue'
+
+const props = defineProps<{
+  onInputDelete: () => void
+}>()
 
 const nodeTypes: NodeTypesObject = {
   input: markRaw(InputNode),
@@ -59,6 +64,12 @@ function onConnect(connection: Connection) {
   })
 
   edges.value = addEdge(connection, remainingEdges) as Edge[]
+}
+
+function onNodesChange(changes: NodeChange[]) {
+  if (changes.some((change) => change.type === 'remove' && change.id === 'node_input')) {
+    props.onInputDelete()
+  }
 }
 
 function addRegexNode() {
