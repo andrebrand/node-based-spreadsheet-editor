@@ -11,7 +11,17 @@
         <button @click="addColumn">+</button>
       </div>
 
-      <div v-for="col in data.columns" :key="col" class="port-row left">
+      <div
+        v-for="col in data.columns"
+        :key="col"
+        class="port-row left output-column-row nodrag"
+        :class="{ 'drag-over': dragOverColumn === col }"
+        draggable="true"
+        @dragstart.stop="startColumnDrag(col)"
+        @dragend="finishColumnDrag"
+        @dragover.prevent.stop="moveColumn(col)"
+        @drop.prevent.stop="finishColumnDrag"
+      >
         <Handle :id="`target-${col}`" type="target" :position="Position.Left" />
         <span>{{ col }}</span>
         <button class="remove-btn" @click="removeColumn(col)">×</button>
@@ -31,6 +41,31 @@ const props = defineProps<NodeProps<{
 }>>()
 
 const newCol = ref('')
+const draggedColumn = ref<string | null>(null)
+const dragOverColumn = ref<string | null>(null)
+
+function startColumnDrag(col: string) {
+  draggedColumn.value = col
+}
+
+function moveColumn(targetCol: string) {
+  const sourceCol = draggedColumn.value
+  dragOverColumn.value = targetCol
+  if (!sourceCol || sourceCol === targetCol) return
+
+  const sourceIndex = props.data.columns.indexOf(sourceCol)
+  const targetIndex = props.data.columns.indexOf(targetCol)
+  if (sourceIndex === -1 || targetIndex === -1) return
+
+  props.data.columns.splice(sourceIndex, 1)
+  const insertIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex
+  props.data.columns.splice(insertIndex, 0, sourceCol)
+}
+
+function finishColumnDrag() {
+  draggedColumn.value = null
+  dragOverColumn.value = null
+}
 
 function addColumn() {
   if (!newCol.value.trim()) return

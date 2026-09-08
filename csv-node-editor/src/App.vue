@@ -69,7 +69,7 @@ function handleFileUpload(event: Event) {
         id: 'node_output',
         type: 'output',
         position: { x: 700, y: 100 },
-        data: { columns: ['Beispiel_Zielspalte'] }
+        data: { columns: [...headers] }
       }
     ]
   }
