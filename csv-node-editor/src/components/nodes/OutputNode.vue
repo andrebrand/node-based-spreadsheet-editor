@@ -24,7 +24,19 @@
         @drop.prevent.stop="dropColumn(col)"
       >
         <Handle :id="`target-${col}`" type="target" :position="Position.Left" />
-        <span>{{ col }}</span>
+        <input
+          v-if="editingColumn === col"
+          v-model="editedColumn"
+          class="rename-column-input nodrag"
+          type="text"
+          @click.stop
+          @keydown.enter.prevent="finishRename(col)"
+          @keydown.escape.prevent="cancelRename"
+          @blur="finishRename(col)"
+        />
+        <span v-else class="output-column-name nodrag" @dblclick.stop="startRename(col)">
+          {{ col }}
+        </span>
         <button class="remove-btn" @click="removeColumn(col)">×</button>
       </div>
     </div>
@@ -44,6 +56,8 @@ const props = defineProps<NodeProps<{
 const newCol = ref('')
 const draggedColumn = ref<string | null>(null)
 const dragOverColumn = ref<string | null>(null)
+const editingColumn = ref<string | null>(null)
+const editedColumn = ref('')
 const { updateNodeInternals } = useVueFlow()
 
 function refreshConnections() {
@@ -84,6 +98,45 @@ function addColumn() {
     props.data.columns.push(newCol.value.trim())
   }
   newCol.value = ''
+  refreshConnections()
+}
+
+function startRename(col: string) {
+  editingColumn.value = col
+  editedColumn.value = col
+}
+
+function cancelRename() {
+  editingColumn.value = null
+  editedColumn.value = ''
+}
+
+function finishRename(oldColumn: string) {
+  if (editingColumn.value !== oldColumn) return
+
+  const newColumn = editedColumn.value.trim()
+  if (!newColumn || newColumn === oldColumn || props.data.columns.includes(newColumn)) {
+    cancelRename()
+    return
+  }
+
+  const columnIndex = props.data.columns.indexOf(oldColumn)
+  if (columnIndex === -1) {
+    cancelRename()
+    return
+  }
+
+  const oldHandle = `target-${oldColumn}`
+  const newHandle = `target-${newColumn}`
+  const edgeList = edges.value as Edge[]
+  edgeList.forEach((edge) => {
+    if (edge.target === props.id && edge.targetHandle === oldHandle) {
+      edge.targetHandle = newHandle
+    }
+  })
+
+  props.data.columns.splice(columnIndex, 1, newColumn)
+  cancelRename()
   refreshConnections()
 }
 
