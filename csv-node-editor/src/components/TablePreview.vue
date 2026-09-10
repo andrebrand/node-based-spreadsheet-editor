@@ -4,10 +4,10 @@
       <h3>Preview table</h3>
       <div v-if="outputTable.headers.length" class="download-buttons">
         <button class="download-csv-btn" type="button" @click="downloadCsv">
-          CSV herunterladen
+          Download CSV
         </button>
         <button class="download-excel-btn" type="button" @click="downloadExcel">
-          Excel herunterladen
+          Download Excel
         </button>
       </div>
     </div>
