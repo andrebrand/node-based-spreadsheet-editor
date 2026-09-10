@@ -20,8 +20,8 @@
         draggable="true"
         @dragstart.stop="startColumnDrag(col)"
         @dragend="finishColumnDrag"
-        @dragover.prevent.stop="moveColumn(col)"
-        @drop.prevent.stop="finishColumnDrag"
+        @dragover.prevent.stop="previewColumnDrop(col)"
+        @drop.prevent.stop="dropColumn(col)"
       >
         <Handle :id="`target-${col}`" type="target" :position="Position.Left" />
         <span>{{ col }}</span>
@@ -54,9 +54,12 @@ function startColumnDrag(col: string) {
   draggedColumn.value = col
 }
 
-function moveColumn(targetCol: string) {
-  const sourceCol = draggedColumn.value
+function previewColumnDrop(targetCol: string) {
   dragOverColumn.value = targetCol
+}
+
+function dropColumn(targetCol: string) {
+  const sourceCol = draggedColumn.value
   if (!sourceCol || sourceCol === targetCol) return
 
   const sourceIndex = props.data.columns.indexOf(sourceCol)
@@ -66,6 +69,7 @@ function moveColumn(targetCol: string) {
   props.data.columns.splice(sourceIndex, 1)
   const insertIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex
   props.data.columns.splice(insertIndex, 0, sourceCol)
+  finishColumnDrag()
 }
 
 function finishColumnDrag() {
