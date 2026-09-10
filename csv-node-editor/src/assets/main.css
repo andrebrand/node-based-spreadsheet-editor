@@ -55,5 +55,11 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 
 /* Table Styling */
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.table-preview-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.download-buttons { display: flex; gap: 6px; }
+.download-csv-btn { padding: 6px 10px; border: 0; border-radius: 4px; background: #0f766e; color: white; cursor: pointer; font-size: 12px; }
+.download-csv-btn:hover { background: #115e59; }
+.download-excel-btn { padding: 6px 10px; border: 0; border-radius: 4px; background: #15803d; color: white; cursor: pointer; font-size: 12px; }
+.download-excel-btn:hover { background: #166534; }
 th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
 th { background-color: #f1f5f9; }
