@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node transform-node">
-    <NodeTitle v-model:label="data.label" default-label="⚡ RegEx Bearbeitung" />
+    <NodeTitle v-model:label="data.label" default-label="💫 RegEx Bearbeitung" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="input" type="target" :position="Position.Left" />

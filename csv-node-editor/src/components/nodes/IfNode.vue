@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node if-node">
-    <NodeTitle v-model:label="data.label" default-label="If Node" />
+    <NodeTitle v-model:label="data.label" default-label="✅ If Node" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="condition" type="target" :position="Position.Left" />

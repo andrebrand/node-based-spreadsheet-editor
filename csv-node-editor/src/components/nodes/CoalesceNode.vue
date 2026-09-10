@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node coalesce-node">
-    <NodeTitle v-model:label="data.label" default-label="Coalesce Node" />
+    <NodeTitle v-model:label="data.label" default-label="🔀 Coalesce Node" />
     <div class="node-body">
       <div v-for="index in data.inputCount" :key="index" class="port-row left">
         <Handle :id="`input-${index - 1}`" type="target" :position="Position.Left" />

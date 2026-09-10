@@ -1,7 +1,7 @@
 <template>
   <div class="table-preview">
     <div class="table-preview-header">
-      <h3>Dynamische Ausgabetabelle</h3>
+      <h3>Tabellenvorschau</h3>
       <div v-if="outputTable.headers.length" class="download-buttons">
         <button class="download-csv-btn" type="button" @click="downloadCsv">
           CSV herunterladen

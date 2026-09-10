@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node counter-node">
-    <NodeTitle v-model:label="data.label" default-label="Counter Node" />
+    <NodeTitle v-model:label="data.label" default-label="💯 Counter Node" />
     <div class="node-body">
       <div class="controls">
         <label>Startwert:</label>

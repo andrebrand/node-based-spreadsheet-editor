@@ -1,7 +1,7 @@
 <template>
   <div class="group-node">
     <NodeResizer :min-width="280" :min-height="180" />
-    <NodeTitle v-model:label="data.label" default-label="Group Node" header-class="group-node-header" />
+    <NodeTitle v-model:label="data.label" default-label="🔳 Group Node" header-class="group-node-header" />
 
     <div class="group-port outer-input">
       <Handle id="input" type="target" :position="Position.Left" />

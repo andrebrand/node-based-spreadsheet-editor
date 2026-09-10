@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node combine-node">
-    <NodeTitle v-model:label="data.label" default-label="Combine Strings" />
+    <NodeTitle v-model:label="data.label" default-label="➕ Combine Strings" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="string1" type="target" :position="Position.Left" />

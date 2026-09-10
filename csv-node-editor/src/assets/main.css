@@ -14,6 +14,10 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .load-plan-btn:hover { background: #1d4ed8; }
 .hidden-file-input { display: none; }
 .hidden { display: none; }
+.save-btn-wrapper {
+    display: flex;
+    gap: 8px;
+}
 
 .main-content { display: flex; flex: 1; height: calc(100vh - 60px); }
 .editor-pane { flex: 6; border-right: 2px solid #ccc; position: relative; }
@@ -26,7 +30,7 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .array-menu-toggle { background: #7c3aed; }
 .menu-chevron { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform 0.15s ease; }
 .menu-chevron.open { transform: rotate(225deg) translate(-1px, -1px); }
-.node-menu-items { position: absolute; top: calc(100% + 4px); left: 0; min-width: 190px; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 5px; box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16); }
+.node-menu-items { position: absolute; top: calc(100% + 4px); left: 0; min-width: 200px; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 5px; box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16); }
 .node-menu-items button { display: block; width: 100%; padding: 7px 9px; border: 0; border-radius: 3px; background: transparent; color: #1e293b; text-align: left; cursor: pointer; }
 .node-menu-items button:hover { background: #e2e8f0; }
 
@@ -51,6 +55,7 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .output-column-row.drag-over { background: #dbeafe; }
 .output-column-row:active { cursor: grabbing; }
 .output-column-name { cursor: text; }
+.port-row.output-column-row { justify-content: space-between;}
 .rename-column-input { min-width: 0; width: 120px; padding: 2px 4px; border: 1px solid #93c5fd; border-radius: 3px; font-size: 12px; }
 .delete-node-btn { width: 100%; padding: 5px; border: 1px solid #fecaca; border-radius: 4px; background: #fff1f2; color: #b91c1c; cursor: pointer; font-size: 11px; }
 .delete-node-btn:hover { background: #ffe4e6; }
@@ -80,3 +85,6 @@ th { background-color: #f1f5f9; }
 
 .vue-flow__handle { width: 10px; height: 10px; background: #2563eb; border-radius: 50%; }
 .vue-flow__handle-left { background: #eb8525; }
+.vue-flow__node-input, .vue-flow__node-output {
+    width: auto;
+}

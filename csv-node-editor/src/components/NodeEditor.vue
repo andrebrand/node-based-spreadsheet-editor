@@ -3,18 +3,18 @@
     <div class="toolbar">
       <div class="node-menu">
         <button class="node-menu-toggle" type="button" :aria-expanded="openMenu === 'strings'" @click="toggleMenu('strings')">
-          <span>Functions</span>
+          <span> + Functions</span>
           <span class="menu-chevron" :class="{ open: openMenu === 'strings' }" aria-hidden="true"></span>
         </button>
         <div v-if="openMenu === 'strings'" class="node-menu-items">
-          <button @click="addRegexNode(); closeMenu()">+ RegEx Node</button>
-          <button @click="addStringNode(); closeMenu()">+ String Node</button>
-          <button @click="addCombineStringsNode(); closeMenu()">+ Combine Strings Node</button>
-          <button @click="addCounterNode(); closeMenu()">+ Counter Node</button>
-          <button @click="addCoalesceNode(); closeMenu()">+ Coalesce Node</button>
-          <button @click="addCompareNode(); closeMenu()">+ Compare Node</button>
-          <button @click="addIfNode(); closeMenu()">+ If Node</button>
-          <button @click="addGroupNode(); closeMenu()">+ Group Node</button>
+          <button @click="addRegexNode(); closeMenu()">💫 RegEx Node</button>
+          <button @click="addStringNode(); closeMenu()">🆎 String Node</button>
+          <button @click="addCombineStringsNode(); closeMenu()">➕ Combine Strings Node</button>
+          <button @click="addCounterNode(); closeMenu()">💯 Counter Node</button>
+          <button @click="addCoalesceNode(); closeMenu()">🔀 Coalesce Node</button>
+          <button @click="addCompareNode(); closeMenu()">⚖ Compare Node</button>
+          <button @click="addIfNode(); closeMenu()">✅ If Node</button>
+          <button @click="addGroupNode(); closeMenu()">🔳 Group Node</button>
         </div>
       </div>
       <div class="hidden">

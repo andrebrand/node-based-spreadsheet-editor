@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node string-node">
-    <NodeTitle v-model:label="data.label" default-label="T StringNode" />
+    <NodeTitle v-model:label="data.label" default-label="🆎 StringNode" />
     <div class="node-body">
       <div class="controls">
         <label for="string-value">Fester String:</label>

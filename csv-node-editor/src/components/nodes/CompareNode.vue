@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node compare-node">
-    <NodeTitle v-model:label="data.label" default-label="Compare Node" />
+    <NodeTitle v-model:label="data.label" default-label="⚖ Compare Node" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="leftString" type="target" :position="Position.Left" />
