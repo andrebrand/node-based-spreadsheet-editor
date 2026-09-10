@@ -40,9 +40,10 @@
       @nodes-change="onNodesChange"
       @node-drag-stop="onNodeDragStop"
       @edge-double-click="onEdgeDoubleClick"
+      @click="closeMenu()"
       fit-view-on-init
     >
-      <Background />
+      <Background  />
       <Controls />
     </VueFlow>
   </div>
