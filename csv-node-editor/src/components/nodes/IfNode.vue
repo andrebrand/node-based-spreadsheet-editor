@@ -1,0 +1,41 @@
+<template>
+  <div class="custom-node if-node">
+    <div class="node-header">If Node</div>
+    <div class="node-body">
+      <div class="port-row left">
+        <Handle id="condition" type="target" :position="Position.Left" />
+        <span>Bedingung</span>
+      </div>
+
+      <div class="port-row left">
+        <Handle id="then" type="target" :position="Position.Left" />
+        <span>Then</span>
+      </div>
+
+      <div class="port-row left">
+        <Handle id="else" type="target" :position="Position.Left" />
+        <span>Else</span>
+      </div>
+
+      <div class="port-row right">
+        <span>Ausgabe</span>
+        <Handle id="output" type="source" :position="Position.Right" />
+      </div>
+
+      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { Handle, Position, useVueFlow } from '@vue-flow/core'
+import type { NodeProps } from '@vue-flow/core'
+
+const props = defineProps<NodeProps<Record<string, never>>>()
+
+const { removeNodes } = useVueFlow()
+
+function deleteNode() {
+  removeNodes([props.id])
+}
+</script>

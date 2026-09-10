@@ -13,6 +13,7 @@
           <button @click="addCounterNode(); closeMenu()">+ Counter Node</button>
           <button @click="addCoalesceNode(); closeMenu()">+ Coalesce Node</button>
           <button @click="addCompareNode(); closeMenu()">+ Compare Node</button>
+          <button @click="addIfNode(); closeMenu()">+ If Node</button>
         </div>
       </div>
       <div class="node-menu">
@@ -64,6 +65,7 @@ import SplitNode from './nodes/SplitNode.vue'
 import CounterNode from './nodes/CounterNode.vue'
 import CoalesceNode from './nodes/CoalesceNode.vue'
 import CompareNode from './nodes/CompareNode.vue'
+import IfNode from './nodes/IfNode.vue'
 
 const props = defineProps<{
   flowKey: number
@@ -90,7 +92,8 @@ const nodeTypes: NodeTypesObject = {
   split: markRaw(SplitNode),
   counter: markRaw(CounterNode),
   coalesce: markRaw(CoalesceNode),
-  compare: markRaw(CompareNode)
+  compare: markRaw(CompareNode),
+  if: markRaw(IfNode)
 }
 
 function isValidConnection(connection: Connection) {
@@ -220,6 +223,17 @@ function addCompareNode() {
     label: 'Compare',
     position: { x: 600, y: 850 },
     data: { operator: 'equals' }
+  })
+}
+
+function addIfNode() {
+  const id = `if_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'if',
+    label: 'If',
+    position: { x: 850, y: 850 },
+    data: {}
   })
 }
 </script>

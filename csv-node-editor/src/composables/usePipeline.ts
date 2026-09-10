@@ -103,6 +103,26 @@ export const outputTable = computed(() => {
       })
     }
 
+    // If Node: Gibt pro Zeile den Then- oder Else-Wert zurück
+    if (sourceNode.type === 'if') {
+      const conditionStream = getStreamForHandle(sourceNode.id, 'condition')
+      const thenStream = getStreamForHandle(sourceNode.id, 'then')
+      const elseStream = getStreamForHandle(sourceNode.id, 'else')
+
+      return rawData.value.rows.map((_, rowIndex) => {
+        const condition = conditionStream[rowIndex]
+        const isTrue = typeof condition === 'boolean'
+          ? condition
+          : String(condition ?? '').trim().toLowerCase() === 'true'
+            ? true
+            : String(condition ?? '').trim().toLowerCase() === 'false'
+              ? false
+              : Boolean(condition)
+
+        return String(isTrue ? thenStream[rowIndex] ?? '' : elseStream[rowIndex] ?? '')
+      })
+    }
+
     // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
     if (sourceNode.type === 'combine') {
       const string1 = getStreamForHandle(sourceNode.id, 'string1')
