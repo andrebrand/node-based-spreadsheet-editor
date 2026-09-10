@@ -3,7 +3,7 @@
     <div class="toolbar">
       <div class="node-menu">
         <button class="node-menu-toggle" type="button" :aria-expanded="openMenu === 'strings'" @click="toggleMenu('strings')">
-          <span>Strings</span>
+          <span>Functions</span>
           <span class="menu-chevron" :class="{ open: openMenu === 'strings' }" aria-hidden="true"></span>
         </button>
         <div v-if="openMenu === 'strings'" class="node-menu-items">
@@ -17,7 +17,7 @@
           <button @click="addGroupNode(); closeMenu()">+ Group Node</button>
         </div>
       </div>
-      <div class="node-menu">
+      <div class="hidden">
         <button class="node-menu-toggle array-menu-toggle" type="button" :aria-expanded="openMenu === 'arrays'" @click="toggleMenu('arrays')">
           <span>Array Functions</span>
           <span class="menu-chevron" :class="{ open: openMenu === 'arrays' }" aria-hidden="true"></span>
