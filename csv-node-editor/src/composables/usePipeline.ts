@@ -66,6 +66,22 @@ export const outputTable = computed(() => {
       return startValues.map((startValue, index) => String(startValue + index * increment))
     }
 
+    // Coalesce Node: Liefert pro Zeile den ersten nicht-leeren String-Wert
+    if (sourceNode.type === 'coalesce') {
+      const inputCount = sourceNode.data?.inputCount || 0
+      const inputStreams = Array.from({ length: inputCount }, (_, index) => (
+        getStreamForHandle(sourceNode.id, `input-${index}`)
+      ))
+
+      return rawData.value.rows.map((_, rowIndex) => {
+        for (const stream of inputStreams) {
+          const value = stream[rowIndex]
+          if (value !== '' && value !== undefined && value !== null) return String(value)
+        }
+        return ''
+      })
+    }
+
     // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
     if (sourceNode.type === 'combine') {
       const string1 = getStreamForHandle(sourceNode.id, 'string1')
