@@ -9,13 +9,13 @@
     </div>
 
     <div class="group-port inner-input">
-      <span>Interner Input</span>
+      <span>|</span>
       <Handle id="internal-input" type="source" :position="Position.Right" />
     </div>
 
     <div class="group-port inner-output">
       <Handle id="internal-output" type="target" :position="Position.Left" />
-      <span>Interner Output</span>
+      <span>|</span>
     </div>
 
     <div class="group-port outer-output">

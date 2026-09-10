@@ -58,8 +58,8 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .group-node-header { padding: 8px 12px; border-bottom: 1px solid #c4b5fd; font-weight: 700; }
 .group-port { position: absolute; display: flex; align-items: center; gap: 6px; padding: 3px 6px; font-size: 11px; white-space: nowrap; }
 .group-port.outer-input { top: 35px; left: 0; }
-.group-port.inner-input { top: 55px; left: 0; }
-.group-port.inner-output { top: 55px; right: 0 }
+.group-port.inner-input { top: 35px; left: 30px; }
+.group-port.inner-output { top: 35px; right: 35px }
 .group-port.outer-output { top: 35px; right: 0; }
 .group-delete-btn { position: absolute; right: 10px; bottom: 10px; width: auto; }
 .vue-flow__node-group:not(.dragging) { z-index: -1 !important; }
