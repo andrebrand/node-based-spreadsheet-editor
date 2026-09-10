@@ -14,6 +14,7 @@
           <button @click="addCoalesceNode(); closeMenu()">+ Coalesce Node</button>
           <button @click="addCompareNode(); closeMenu()">+ Compare Node</button>
           <button @click="addIfNode(); closeMenu()">+ If Node</button>
+          <button @click="addGroupNode(); closeMenu()">+ Group Node</button>
         </div>
       </div>
       <div class="node-menu">
@@ -37,6 +38,7 @@
       :delete-key-code="['Backspace', 'Delete']"
       @connect="onConnect"
       @nodes-change="onNodesChange"
+      @node-drag-stop="onNodeDragStop"
       fit-view-on-init
     >
       <Background />
@@ -66,6 +68,7 @@ import CounterNode from './nodes/CounterNode.vue'
 import CoalesceNode from './nodes/CoalesceNode.vue'
 import CompareNode from './nodes/CompareNode.vue'
 import IfNode from './nodes/IfNode.vue'
+import GroupNode from './nodes/GroupNode.vue'
 
 const props = defineProps<{
   flowKey: number
@@ -93,7 +96,8 @@ const nodeTypes: NodeTypesObject = {
   counter: markRaw(CounterNode),
   coalesce: markRaw(CoalesceNode),
   compare: markRaw(CompareNode),
-  if: markRaw(IfNode)
+  if: markRaw(IfNode),
+  group: markRaw(GroupNode)
 }
 
 function isValidConnection(connection: Connection) {
@@ -104,10 +108,13 @@ function isValidConnection(connection: Connection) {
   const targetNode = nodeList.find((node) => node.id === connection.target)
   if (!sourceNode || !targetNode) return false
 
-  return getHandleType(sourceNode.type, 'source') === getHandleType(targetNode.type, 'target')
+  const sourceType = getHandleType(sourceNode.type, 'source')
+  const targetType = getHandleType(targetNode.type, 'target')
+  return sourceType === 'any' || targetType === 'any' || sourceType === targetType
 }
 
 function getHandleType(nodeType: string | undefined, side: 'source' | 'target') {
+  if (nodeType === 'group') return 'any'
   if (nodeType === 'join' && side === 'source') return 'array'
   if (nodeType === 'split' && side === 'target') return 'array'
   if (nodeType === 'split' && side === 'source') return 'string'
@@ -135,6 +142,30 @@ function onNodesChange(changes: NodeChange[]) {
   const inputStillExists = nodeList.some((node) => node.id === 'node_input')
   if (!inputStillExists && changes.some((change) => change.type === 'remove' && change.id === 'node_input')) {
     props.onInputDelete()
+  }
+}
+
+function onNodeDragStop({ node }: { node: { id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; parentNode?: string; position: { x: number; y: number } } }) {
+  if (node.type === 'group') return
+
+  const nodeList = nodes.value as Array<{ id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; position: { x: number; y: number }; parentNode?: string }>
+  const group = nodeList.find((candidate) => candidate.type === 'group')
+  if (!group?.computedPosition || !group.dimensions || !node.computedPosition || !node.dimensions) return
+
+  const insideGroup = node.computedPosition.x >= group.computedPosition.x &&
+    node.computedPosition.y >= group.computedPosition.y &&
+    node.computedPosition.x + node.dimensions.width <= group.computedPosition.x + group.dimensions.width &&
+    node.computedPosition.y + node.dimensions.height <= group.computedPosition.y + group.dimensions.height
+
+  if (insideGroup && node.parentNode !== group.id) {
+    node.parentNode = group.id
+    node.position = {
+      x: node.computedPosition.x - group.computedPosition.x,
+      y: node.computedPosition.y - group.computedPosition.y
+    }
+  } else if (!insideGroup && node.parentNode === group.id) {
+    node.parentNode = undefined
+    node.position = { x: node.computedPosition.x, y: node.computedPosition.y }
   }
 }
 
@@ -233,6 +264,19 @@ function addIfNode() {
     type: 'if',
     label: 'If',
     position: { x: 850, y: 850 },
+    data: {}
+  })
+}
+
+function addGroupNode() {
+  const id = `group_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'group',
+    label: 'Group',
+    position: { x: 500, y: 250 },
+    width: 420,
+    height: 260,
     data: {}
   })
 }

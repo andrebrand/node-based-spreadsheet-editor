@@ -123,6 +123,16 @@ export const outputTable = computed(() => {
       })
     }
 
+    // Group Node: Leitet Werte zwischen äusseren und inneren Ports weiter
+    if (sourceNode.type === 'group') {
+      if (edge.sourceHandle === 'internal-input') return getStreamForHandle(sourceNode.id, 'input')
+      const internalOutputEdge = edgeList.find((candidate) => (
+        candidate.target === sourceNode.id && candidate.targetHandle === 'internal-output'
+      ))
+      if (internalOutputEdge) return getStreamForHandle(sourceNode.id, 'internal-output')
+      return getStreamForHandle(sourceNode.id, 'input')
+    }
+
     // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
     if (sourceNode.type === 'combine') {
       const string1 = getStreamForHandle(sourceNode.id, 'string1')

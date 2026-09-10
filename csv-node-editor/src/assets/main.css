@@ -1,6 +1,7 @@
 @import '@vue-flow/core/dist/style.css';
 @import '@vue-flow/core/dist/theme-default.css';
 @import '@vue-flow/controls/dist/style.css';
+@import '@vue-flow/node-resizer/dist/style.css';
 
 * { box-sizing: border-box; }
 body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
@@ -50,6 +51,15 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .rename-column-input { min-width: 0; width: 120px; padding: 2px 4px; border: 1px solid #93c5fd; border-radius: 3px; font-size: 12px; }
 .delete-node-btn { width: 100%; padding: 5px; border: 1px solid #fecaca; border-radius: 4px; background: #fff1f2; color: #b91c1c; cursor: pointer; font-size: 11px; }
 .delete-node-btn:hover { background: #ffe4e6; }
+.group-node { position: relative; width: 100%; height: 100%; min-width: 280px; min-height: 180px; border: 2px dashed #7c3aed; border-radius: 8px; background: rgba(237, 233, 254, 0.72); color: #312e81; }
+.group-node-header { padding: 8px 12px; border-bottom: 1px solid #c4b5fd; font-weight: 700; }
+.group-port { position: absolute; display: flex; align-items: center; gap: 6px; padding: 3px 6px; font-size: 11px; white-space: nowrap; }
+.outer-input { top: 48px; left: -8px; }
+.inner-input { top: 48px; left: 56px; }
+.inner-output { top: 92px; right: 56px; }
+.outer-output { top: 92px; right: -8px; }
+.group-delete-btn { position: absolute; right: 10px; bottom: 10px; width: auto; }
+.vue-flow__node-group { z-index: -1; }
 .small-node-btn { width: 100%; margin: 4px 0 8px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; background: #f8fafc; color: #334155; cursor: pointer; font-size: 11px; }
 .small-node-btn:hover { background: #e2e8f0; }
 
