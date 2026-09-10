@@ -26,7 +26,7 @@
       </table>
     </div>
     <div v-else class="empty-state">
-      Verbinde Spalten vom Input zum Output, um Ergebnisse zu sehen.
+      Lade eine CSV- oder Excel-Datei um die Vorschau zu sehen.
     </div>
   </div>
 </template>
