@@ -12,6 +12,7 @@
           <button @click="addCombineStringsNode(); closeMenu()">+ Combine Strings Node</button>
           <button @click="addCounterNode(); closeMenu()">+ Counter Node</button>
           <button @click="addCoalesceNode(); closeMenu()">+ Coalesce Node</button>
+          <button @click="addCompareNode(); closeMenu()">+ Compare Node</button>
         </div>
       </div>
       <div class="node-menu">
@@ -62,6 +63,7 @@ import JoinNode from './nodes/JoinNode.vue'
 import SplitNode from './nodes/SplitNode.vue'
 import CounterNode from './nodes/CounterNode.vue'
 import CoalesceNode from './nodes/CoalesceNode.vue'
+import CompareNode from './nodes/CompareNode.vue'
 
 const props = defineProps<{
   flowKey: number
@@ -87,7 +89,8 @@ const nodeTypes: NodeTypesObject = {
   join: markRaw(JoinNode),
   split: markRaw(SplitNode),
   counter: markRaw(CounterNode),
-  coalesce: markRaw(CoalesceNode)
+  coalesce: markRaw(CoalesceNode),
+  compare: markRaw(CompareNode)
 }
 
 function isValidConnection(connection: Connection) {
@@ -206,6 +209,17 @@ function addCoalesceNode() {
     label: 'Coalesce',
     position: { x: 600, y: 700 },
     data: { inputCount: 2 }
+  })
+}
+
+function addCompareNode() {
+  const id = `compare_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'compare',
+    label: 'Compare',
+    position: { x: 600, y: 850 },
+    data: { operator: 'equals' }
   })
 }
 </script>

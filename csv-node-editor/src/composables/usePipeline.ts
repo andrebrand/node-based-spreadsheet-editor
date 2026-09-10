@@ -82,6 +82,27 @@ export const outputTable = computed(() => {
       })
     }
 
+    // Compare Node: Vergleicht zwei String-Streams und gibt true oder false aus
+    if (sourceNode.type === 'compare') {
+      const leftStream = getStreamForHandle(sourceNode.id, 'left')
+      const rightStream = getStreamForHandle(sourceNode.id, 'right')
+      const operator = sourceNode.data?.operator || 'equals'
+
+      return rawData.value.rows.map((_, rowIndex) => {
+        const left = String(leftStream[rowIndex] ?? '')
+        const right = String(rightStream[rowIndex] ?? '')
+        let result = false
+
+        if (operator === 'not-equals') result = left !== right
+        if (operator === 'contains') result = left.includes(right)
+        if (operator === 'starts-with') result = left.startsWith(right)
+        if (operator === 'ends-with') result = left.endsWith(right)
+        if (operator === 'equals') result = left === right
+
+        return String(result)
+      })
+    }
+
     // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
     if (sourceNode.type === 'combine') {
       const string1 = getStreamForHandle(sourceNode.id, 'string1')
