@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node transform-node">
-    <div class="node-header">⚡ RegEx Bearbeitung</div>
+    <NodeTitle v-model:label="data.label" default-label="⚡ RegEx Bearbeitung" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="input" type="target" :position="Position.Left" />
@@ -36,12 +36,14 @@
 <script setup lang="ts">
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
+import NodeTitle from './NodeTitle.vue'
 
 const props = defineProps<NodeProps<{
   pattern: string
   replacement: string
   mode: 'match' | 'replace'
   flags: string
+  label?: string
 }>>()
 
 const { removeNodes } = useVueFlow()

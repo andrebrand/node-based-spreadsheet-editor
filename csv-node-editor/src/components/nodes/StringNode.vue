@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node string-node">
-    <div class="node-header">T StringNode</div>
+    <NodeTitle v-model:label="data.label" default-label="T StringNode" />
     <div class="node-body">
       <div class="controls">
         <label for="string-value">Fester String:</label>
@@ -25,9 +25,11 @@
 <script setup lang="ts">
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
+import NodeTitle from './NodeTitle.vue'
 
 const props = defineProps<NodeProps<{
   value: string
+  label?: string
 }>>()
 
 const { removeNodes } = useVueFlow()

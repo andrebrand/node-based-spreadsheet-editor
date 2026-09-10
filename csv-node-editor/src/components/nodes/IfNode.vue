@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node if-node">
-    <div class="node-header">If Node</div>
+    <NodeTitle v-model:label="data.label" default-label="If Node" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="condition" type="target" :position="Position.Left" />
@@ -30,8 +30,9 @@
 <script setup lang="ts">
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
+import NodeTitle from './NodeTitle.vue'
 
-const props = defineProps<NodeProps<Record<string, never>>>()
+const props = defineProps<NodeProps<{ label?: string }>>()
 
 const { removeNodes } = useVueFlow()
 

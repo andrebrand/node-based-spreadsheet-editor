@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node split-node">
-    <div class="node-header">Split Node</div>
+    <NodeTitle v-model:label="data.label" default-label="Split Node" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="input" type="target" :position="Position.Left" />
@@ -21,9 +21,11 @@
 <script setup lang="ts">
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
+import NodeTitle from './NodeTitle.vue'
 
 const props = defineProps<NodeProps<{
   outputCount: number
+  label?: string
 }>>()
 
 const { removeNodes } = useVueFlow()

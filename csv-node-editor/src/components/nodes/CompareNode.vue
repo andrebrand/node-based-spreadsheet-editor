@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node compare-node">
-    <div class="node-header">Compare Node</div>
+    <NodeTitle v-model:label="data.label" default-label="Compare Node" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="left" type="target" :position="Position.Left" />
@@ -36,9 +36,11 @@
 <script setup lang="ts">
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
+import NodeTitle from './NodeTitle.vue'
 
 const props = defineProps<NodeProps<{
   operator: 'equals' | 'not-equals' | 'contains' | 'starts-with' | 'ends-with'
+  label?: string
 }>>()
 
 const { removeNodes } = useVueFlow()

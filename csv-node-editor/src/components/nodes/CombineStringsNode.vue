@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node combine-node">
-    <div class="node-header">Combine Strings</div>
+    <NodeTitle v-model:label="data.label" default-label="Combine Strings" />
     <div class="node-body">
       <div class="port-row left">
         <Handle id="string1" type="target" :position="Position.Left" />
@@ -30,8 +30,9 @@
 <script setup lang="ts">
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
+import NodeTitle from './NodeTitle.vue'
 
-const props = defineProps<NodeProps<Record<string, never>>>()
+const props = defineProps<NodeProps<{ label?: string }>>()
 
 const { removeNodes } = useVueFlow()
 

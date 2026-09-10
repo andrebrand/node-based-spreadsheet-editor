@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node counter-node">
-    <div class="node-header">Counter Node</div>
+    <NodeTitle v-model:label="data.label" default-label="Counter Node" />
     <div class="node-body">
       <div class="controls">
         <label>Startwert:</label>
@@ -42,11 +42,13 @@ import { watch } from 'vue'
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { Edge, NodeProps } from '@vue-flow/core'
 import { edges } from '../../composables/usePipeline'
+import NodeTitle from './NodeTitle.vue'
 
 const props = defineProps<NodeProps<{
   startMode: 'manual' | 'input'
   startValue: number
   step: number
+  label?: string
 }>>()
 
 const { removeNodes } = useVueFlow()

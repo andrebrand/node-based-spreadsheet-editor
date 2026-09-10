@@ -32,6 +32,8 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 /* Custom Node Base Styles */
 .custom-node { background: white; border: 1px solid #cbd5e1; border-radius: 6px; width: 220px; font-size: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 .node-header { background: #f8fafc; padding: 8px; border-bottom: 1px solid #cbd5e1; font-weight: bold; border-radius: 6px 6px 0 0; }
+.node-title-text { cursor: text; }
+.node-title-input { width: 100%; padding: 2px 4px; border: 1px solid #93c5fd; border-radius: 3px; font-size: 12px; font-weight: bold; }
 .node-body { padding: 10px; }
 
 .port-row { display: flex; align-items: center; position: relative; margin: 8px 0; min-height: 16px; }
