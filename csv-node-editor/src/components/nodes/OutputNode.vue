@@ -67,7 +67,7 @@ function dropColumn(targetCol: string) {
   if (sourceIndex === -1 || targetIndex === -1) return
 
   props.data.columns.splice(sourceIndex, 1)
-  const insertIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex
+  const insertIndex = targetIndex
   props.data.columns.splice(insertIndex, 0, sourceCol)
   finishColumnDrag()
 }
