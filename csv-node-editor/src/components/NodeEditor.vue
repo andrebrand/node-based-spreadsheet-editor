@@ -39,6 +39,7 @@
       @connect="onConnect"
       @nodes-change="onNodesChange"
       @node-drag-stop="onNodeDragStop"
+      @edge-double-click="onEdgeDoubleClick"
       fit-view-on-init
     >
       <Background />
@@ -51,7 +52,7 @@
 import { ref } from 'vue'
 import { markRaw } from 'vue'
 import { addEdge, ConnectionMode, VueFlow } from '@vue-flow/core'
-import type { Connection, Edge, NodeChange } from '@vue-flow/core'
+import type { Connection, Edge, EdgeMouseEvent, NodeChange } from '@vue-flow/core'
 import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -135,6 +136,17 @@ function onConnect(connection: Connection) {
   })
 
   edges.value = addEdge(connection, remainingEdges) as Edge[]
+}
+
+function onEdgeDoubleClick({ edge }: EdgeMouseEvent) {
+  const remainingEdges: Edge[] = []
+  const edgeList = edges.value as Edge[]
+
+  edgeList.forEach((currentEdge) => {
+    if (currentEdge.id !== edge.id) remainingEdges.push(currentEdge)
+  })
+
+  edges.value = remainingEdges
 }
 
 function onNodesChange(changes: NodeChange[]) {

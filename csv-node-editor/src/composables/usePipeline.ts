@@ -84,8 +84,8 @@ export const outputTable = computed(() => {
 
     // Compare Node: Vergleicht zwei String-Streams und gibt true oder false aus
     if (sourceNode.type === 'compare') {
-      const leftStream = getStreamForHandle(sourceNode.id, 'left')
-      const rightStream = getStreamForHandle(sourceNode.id, 'right')
+      const leftStream = getStreamForHandle(sourceNode.id, 'leftString')
+      const rightStream = getStreamForHandle(sourceNode.id, 'rightString')
       const operator = sourceNode.data?.operator || 'equals'
 
       return rawData.value.rows.map((_, rowIndex) => {

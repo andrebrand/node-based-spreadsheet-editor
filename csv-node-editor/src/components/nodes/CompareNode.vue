@@ -3,12 +3,12 @@
     <NodeTitle v-model:label="data.label" default-label="Compare Node" />
     <div class="node-body">
       <div class="port-row left">
-        <Handle id="left" type="target" :position="Position.Left" />
+        <Handle id="leftString" type="target" :position="Position.Left" />
         <span>String 1</span>
       </div>
 
       <div class="port-row left">
-        <Handle id="right" type="target" :position="Position.Left" />
+        <Handle id="rightString" type="target" :position="Position.Left" />
         <span>String 2</span>
       </div>
 
