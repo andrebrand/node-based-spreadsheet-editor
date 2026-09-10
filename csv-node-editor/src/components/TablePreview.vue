@@ -1,7 +1,7 @@
 <template>
   <div class="table-preview">
     <div class="table-preview-header">
-      <h3>Tabellenvorschau</h3>
+      <h3>Preview table</h3>
       <div v-if="outputTable.headers.length" class="download-buttons">
         <button class="download-csv-btn" type="button" @click="downloadCsv">
           CSV herunterladen
@@ -26,7 +26,7 @@
       </table>
     </div>
     <div v-else class="empty-state">
-      Lade eine CSV- oder Excel-Datei um die Vorschau zu sehen.
+      Upload a CSV- or Excel-file to see the preview.
     </div>
   </div>
 </template>

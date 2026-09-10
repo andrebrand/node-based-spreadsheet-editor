@@ -4,8 +4,8 @@
       <h2>CSV/Excel Node Editor</h2>
       <input ref="fileInput" type="file" accept=".csv, .xlsx, .xls" @change="handleFileUpload" />
       <div class="save-btn-wrapper">
-        <button class="save-plan-btn" type="button" @click="savePlan">💾 Plan speichern</button>
-        <button class="load-plan-btn" type="button" @click="planFileInput?.click()">📁 Plan laden</button>
+        <button class="save-plan-btn" type="button" @click="savePlan">💾 Save working file</button>
+        <button class="load-plan-btn" type="button" @click="planFileInput?.click()">📁 Load working file</button>
       </div>
       <input ref="planFileInput" class="hidden-file-input" type="file" accept=".json" @change="handlePlanLoad" />
     </header>

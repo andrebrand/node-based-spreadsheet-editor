@@ -13,7 +13,7 @@
       </div>
 
       <button class="small-node-btn" type="button" @click="addOutput">+ Output</button>
-      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
+      <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

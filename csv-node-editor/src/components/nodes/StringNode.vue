@@ -3,21 +3,21 @@
     <NodeTitle v-model:label="data.label" default-label="🆎 StringNode" />
     <div class="node-body">
       <div class="controls">
-        <label for="string-value">Fester String:</label>
+        <label for="string-value">Static text:</label>
         <input
           id="string-value"
           v-model="data.value"
           type="text"
-          placeholder="Text eingeben..."
+          placeholder="Input text..."
         />
       </div>
 
       <div class="port-row right">
-        <span>Ausgabe</span>
+        <span>Output</span>
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
-      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
+      <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

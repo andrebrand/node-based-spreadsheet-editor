@@ -23,7 +23,7 @@
       <Handle id="output" type="source" :position="Position.Right" />
     </div>
 
-    <button class="delete-node-btn group-delete-btn" type="button" @click="deleteNode">Node löschen</button>
+    <button class="delete-node-btn group-delete-btn" type="button" @click="deleteNode">Delete node</button>
   </div>
 </template>
 

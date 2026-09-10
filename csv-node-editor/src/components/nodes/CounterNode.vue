@@ -3,17 +3,17 @@
     <NodeTitle v-model:label="data.label" default-label="💯 Counter Node" />
     <div class="node-body">
       <div class="controls">
-        <label>Startwert:</label>
+        <label>Input method:</label>
         <select v-model="data.startMode">
-          <option value="manual">Manuell</option>
-          <option value="input">Input</option>
+          <option value="manual">Static</option>
+          <option value="input">Node</option>
         </select>
 
         <input
           v-if="data.startMode === 'manual'"
           v-model.number="data.startValue"
           type="number"
-          placeholder="Startwert"
+          placeholder="Start value"
         />
       </div>
 
@@ -23,16 +23,16 @@
       </div>
 
       <div class="controls">
-        <label>Schrittweite:</label>
+        <label>Step size:</label>
         <input v-model.number="data.step" type="number" placeholder="1" />
       </div>
 
       <div class="port-row right">
-        <span>Ausgabe</span>
+        <span>Output</span>
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
-      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
+      <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

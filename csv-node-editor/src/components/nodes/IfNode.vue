@@ -4,7 +4,7 @@
     <div class="node-body">
       <div class="port-row left">
         <Handle id="condition" type="target" :position="Position.Left" />
-        <span>Bedingung</span>
+        <span>If</span>
       </div>
 
       <div class="port-row left">
@@ -18,11 +18,11 @@
       </div>
 
       <div class="port-row right">
-        <span>Ausgabe</span>
+        <span>Output</span>
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
-      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
+      <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

@@ -13,13 +13,13 @@
       </div>
 
       <div class="controls">
-        <label>Vergleich:</label>
+        <label>Compare:</label>
         <select v-model="data.operator">
-          <option value="equals">Ist gleich</option>
-          <option value="not-equals">Ist nicht gleich</option>
-          <option value="contains">Enthält</option>
-          <option value="starts-with">Beginnt mit</option>
-          <option value="ends-with">Endet mit</option>
+          <option value="equals">Is Equal</option>
+          <option value="not-equals">Is Not Equal</option>
+          <option value="contains">Contains</option>
+          <option value="starts-with">Starts With</option>
+          <option value="ends-with">Ends With</option>
         </select>
       </div>
 
@@ -28,7 +28,7 @@
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
-      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
+      <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

@@ -4,14 +4,14 @@
     <div class="node-body">
       <div class="port-row left">
         <Handle id="input" type="target" :position="Position.Left" />
-        <span>Eingabe</span>
+        <span>Input</span>
       </div>
 
       <div class="controls">
-        <label>Modus:</label>
+        <label>Mode:</label>
         <select v-model="data.mode">
-          <option value="match">Match filtern</option>
-          <option value="replace">Ersetzen</option>
+          <option value="match">Filter Match</option>
+          <option value="replace">Replace</option>
         </select>
 
         <label>Regex Pattern:</label>
@@ -24,11 +24,11 @@
       </div>
 
       <div class="port-row right">
-        <span>Ergebnis</span>
+        <span>Output</span>
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
-      <button class="delete-node-btn" type="button" @click="deleteNode">Node löschen</button>
+      <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>
