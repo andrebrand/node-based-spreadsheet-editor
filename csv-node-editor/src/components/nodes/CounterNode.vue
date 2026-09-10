@@ -8,18 +8,19 @@
           <option value="manual">Static</option>
           <option value="input">Node</option>
         </select>
-
-        <input
-          v-if="data.startMode === 'manual'"
-          v-model.number="data.startValue"
-          type="number"
-          placeholder="Start value"
-        />
+        <template v-if="data.startMode === 'manual'">
+          <label>Start value:</label>
+          <input
+            v-model.number="data.startValue"
+            type="number"
+            placeholder="Start value"
+          />
+        </template>
       </div>
 
       <div v-if="data.startMode === 'input'" class="port-row left">
         <Handle id="start" type="target" :position="Position.Left" />
-        <span>Startwert</span>
+        <span>Start value</span>
       </div>
 
       <div class="controls">
