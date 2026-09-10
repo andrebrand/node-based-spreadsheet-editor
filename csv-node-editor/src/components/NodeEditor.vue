@@ -3,7 +3,7 @@
     <div class="toolbar">
       <div class="node-menu">
         <button class="node-menu-toggle" type="button" :aria-expanded="openMenu === 'strings'" @click="toggleMenu('strings')">
-          <span> + Functions</span>
+          <span> + Funktionen</span>
           <span class="menu-chevron" :class="{ open: openMenu === 'strings' }" aria-hidden="true"></span>
         </button>
         <div v-if="openMenu === 'strings'" class="node-menu-items">
