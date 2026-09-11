@@ -15,7 +15,7 @@
         </select>
 
         <label>Regex Pattern:</label>
-        <input class="nodrag" type="text" v-model="data.pattern" placeholder="z.B. \d+" />
+        <input class="nodrag" type="text" v-model="data.pattern" placeholder="e.g. \d+" />
 
         <div class="flags-wrapper">
           <div class="flags-actions">

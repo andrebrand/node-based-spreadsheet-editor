@@ -79,26 +79,26 @@
     <!-- Naming Dialog Modal -->
     <div v-if="namingDialog.isOpen" class="modal-backdrop" @click.self="closeNamingDialog">
       <div class="modal-dialog">
-        <h3 class="modal-title">Preset Name vergeben</h3>
-        <p class="modal-desc">Bitte gib einen Namen für das GroupNode-Preset ein:</p>
+        <h3 class="modal-title">Enter Preset name</h3>
+        <p class="modal-desc">Please enter a name for your preset:</p>
         <input
           ref="presetNameInputRef"
           v-model="namingDialog.name"
           class="modal-input nodrag"
           type="text"
-          placeholder="z.B. Datenbereinigung"
+          placeholder="Preset name..."
           @keydown.enter.prevent="submitNamingDialog"
           @keydown.escape.prevent="closeNamingDialog"
         />
         <div class="modal-actions">
-          <button class="modal-btn cancel" type="button" @click="closeNamingDialog">Abbrechen</button>
+          <button class="modal-btn cancel" type="button" @click="closeNamingDialog">Cancel</button>
           <button
             class="modal-btn confirm"
             type="button"
             :disabled="!namingDialog.name.trim()"
             @click="submitNamingDialog"
           >
-            Speichern
+            Save
           </button>
         </div>
       </div>
