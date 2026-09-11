@@ -1,5 +1,4 @@
 <template>
-  <div class="editor-container">
   <div
     class="editor-container"
     @pointerdown.capture="preventDragOnInteractive"

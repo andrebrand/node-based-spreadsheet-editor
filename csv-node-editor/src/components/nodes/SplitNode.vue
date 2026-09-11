@@ -12,8 +12,6 @@
         <Handle :id="`output-${index - 1}`" type="source" :position="Position.Right" />
       </div>
 
-      <button class="small-node-btn" type="button" @click="addOutput">+ Output</button>
-      <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
       <button class="small-node-btn nodrag" type="button" @click="addOutput">+ Output</button>
       <button class="delete-node-btn nodrag" type="button" @click="deleteNode">Delete node</button>
     </div>

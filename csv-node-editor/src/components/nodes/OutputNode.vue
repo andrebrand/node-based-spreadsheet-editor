@@ -10,7 +10,6 @@
           @keyup.enter="addColumn" 
           @paste.prevent="pasteColumns"
         />
-        <button @click="addColumn">+</button>
         <button class="nodrag" @click="addColumn">+</button>
       </div>
 
@@ -39,7 +38,6 @@
         <span v-else class="output-column-name nodrag" @dblclick.stop="startRename(col)">
           {{ col }}
         </span>
-        <button class="remove-btn" @click="removeColumn(col)">×</button>
         <button class="remove-btn nodrag" @click="removeColumn(col)">×</button>
       </div>
     </div>
