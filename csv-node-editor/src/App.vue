@@ -10,11 +10,25 @@
       <input ref="planFileInput" class="hidden-file-input" type="file" accept=".json" @change="handlePlanLoad" />
     </header>
 
-    <div class="main-content">
+    <div ref="mainContentRef" class="main-content" :class="{ 'is-resizing': isResizing }">
       <div class="editor-pane">
         <NodeEditor :flow-key="flowKey" :on-input-delete="resetApp" />
       </div>
-      <div class="preview-pane">
+      <div
+        class="pane-resizer nodrag"
+        :class="{ 'is-dragging': isResizing }"
+        role="separator"
+        aria-orientation="vertical"
+        tabindex="0"
+        title="Breite der Vorschau anpassen (Doppelklick zum Zurücksetzen)"
+        @pointerdown="startResize"
+        @dblclick="resetPreviewWidth"
+        @keydown.left.prevent="stepResize(20)"
+        @keydown.right.prevent="stepResize(-20)"
+      >
+        <div class="resizer-handle"></div>
+      </div>
+      <div class="preview-pane" :style="{ width: `${previewWidth}px`, flex: 'none' }">
         <TablePreview />
       </div>
     </div>
@@ -25,13 +39,82 @@
 import * as XLSX from 'xlsx'
 import NodeEditor from './components/NodeEditor.vue'
 import TablePreview from './components/TablePreview.vue'
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import type { Edge, Node } from '@vue-flow/core'
 import { rawData, nodes, edges } from './composables/usePipeline'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const planFileInput = ref<HTMLInputElement | null>(null)
 const flowKey = ref(0)
+
+const mainContentRef = ref<HTMLDivElement | null>(null)
+const defaultPreviewWidth = 650
+const savedWidth = typeof window !== 'undefined' ? localStorage.getItem('csv_editor_preview_pane_width') : null
+const previewWidth = ref<number>(savedWidth ? Math.max(240, parseFloat(savedWidth)) : defaultPreviewWidth)
+const isResizing = ref(false)
+
+function startResize(event: PointerEvent) {
+  event.preventDefault()
+  isResizing.value = true
+
+  const startX = event.clientX
+  const startWidth = previewWidth.value
+
+  const onPointerMove = (e: PointerEvent) => {
+    if (!isResizing.value) return
+    const deltaX = startX - e.clientX
+    const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
+    const minWidth = 240
+    const maxWidth = Math.max(minWidth, containerWidth - 300)
+    const nextWidth = Math.min(maxWidth, Math.max(minWidth, startWidth + deltaX))
+    previewWidth.value = Math.round(nextWidth)
+  }
+
+  const onPointerUp = () => {
+    isResizing.value = false
+    window.removeEventListener('pointermove', onPointerMove)
+    window.removeEventListener('pointerup', onPointerUp)
+    window.removeEventListener('pointercancel', onPointerUp)
+    localStorage.setItem('csv_editor_preview_pane_width', String(previewWidth.value))
+    window.dispatchEvent(new Event('resize'))
+  }
+
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+  window.addEventListener('pointercancel', onPointerUp)
+}
+
+function resetPreviewWidth() {
+  previewWidth.value = defaultPreviewWidth
+  localStorage.setItem('csv_editor_preview_pane_width', String(defaultPreviewWidth))
+  window.dispatchEvent(new Event('resize'))
+}
+
+function stepResize(delta: number) {
+  const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
+  const minWidth = 240
+  const maxWidth = Math.max(minWidth, containerWidth - 300)
+  previewWidth.value = Math.min(maxWidth, Math.max(minWidth, previewWidth.value + delta))
+  localStorage.setItem('csv_editor_preview_pane_width', String(previewWidth.value))
+  window.dispatchEvent(new Event('resize'))
+}
+
+function handleWindowResize() {
+  const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
+  const minWidth = 240
+  const maxWidth = Math.max(minWidth, containerWidth - 300)
+  if (previewWidth.value > maxWidth) {
+    previewWidth.value = maxWidth
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleWindowResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleWindowResize)
+})
 
 function resetApp() {
   rawData.value = {
