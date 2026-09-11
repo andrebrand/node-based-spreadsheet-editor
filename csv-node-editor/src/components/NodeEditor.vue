@@ -41,7 +41,7 @@
         <div v-if="openMenu === 'presets'" class="node-menu-items preset-menu-items">
           <div v-for="preset in presets" :key="preset.id" class="preset-menu-item">
             <button class="preset-spawn-btn" type="button" @click="handleSpawnPreset(preset); closeMenu()">
-              <span>🔳 {{ preset.name }}</span>
+              <span>{{ preset.name }}</span>
             </button>
             <button
               class="preset-delete-btn"
@@ -497,7 +497,7 @@ function addRegexNode() {
     id,
     type: 'regex',
     label: 'Regex',
-    position: getSpawnPosition(220, 180),
+    position: getSpawnPosition(140, 140),
     data: { pattern: '', replacement: '', mode: 'match', flags: '' }
   })
 }
@@ -508,7 +508,7 @@ function addStringNode() {
     id,
     type: 'string',
     label: 'String',
-    position: getSpawnPosition(220, 140),
+    position: getSpawnPosition(180, 180),
     data: { value: '' }
   })
 }
@@ -519,7 +519,7 @@ function addCombineStringsNode() {
     id,
     type: 'combine',
     label: 'Combine Strings',
-    position: getSpawnPosition(220, 170),
+    position: getSpawnPosition(220, 220),
     data: {}
   })
 }
@@ -530,7 +530,7 @@ function addJoinNode() {
     id,
     type: 'join',
     label: 'Join',
-    position: getSpawnPosition(220, 160),
+    position: getSpawnPosition(260, 260),
     data: { inputCount: 2 }
   })
 }
@@ -541,7 +541,7 @@ function addSplitNode() {
     id,
     type: 'split',
     label: 'Split',
-    position: getSpawnPosition(220, 160),
+    position: getSpawnPosition(260, 140),
     data: { outputCount: 2 }
   })
 }
@@ -563,7 +563,7 @@ function addCoalesceNode() {
     id,
     type: 'coalesce',
     label: 'Coalesce',
-    position: getSpawnPosition(220, 160),
+    position: getSpawnPosition(180, 160),
     data: { inputCount: 2 }
   })
 }
@@ -574,7 +574,7 @@ function addCompareNode() {
     id,
     type: 'compare',
     label: 'Compare',
-    position: getSpawnPosition(220, 160),
+    position: getSpawnPosition(140, 200),
     data: { operator: 'equals' }
   })
 }
@@ -585,7 +585,7 @@ function addIfNode() {
     id,
     type: 'if',
     label: 'If',
-    position: getSpawnPosition(220, 170),
+    position: getSpawnPosition(120, 240),
     data: {}
   })
 }
