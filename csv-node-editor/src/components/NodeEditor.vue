@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="editorContainerRef"
     class="editor-container"
     @pointerdown.capture="preventDragOnInteractive"
     @mousedown.capture="preventDragOnInteractive"
@@ -33,6 +34,7 @@
       </div>
     </div>
     <VueFlow
+      id="flow-editor"
       :key="flowKey"
       v-model:nodes="nodes"
       v-model:edges="edges"
@@ -56,12 +58,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { markRaw } from 'vue'
-import { addEdge, ConnectionMode, VueFlow } from '@vue-flow/core'
+import { addEdge, ConnectionMode, useVueFlow, VueFlow } from '@vue-flow/core'
 import type { Connection, Edge, EdgeMouseEvent, NodeChange } from '@vue-flow/core'
 import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { nodes, edges } from '../composables/usePipeline'
+
+const editorContainerRef = ref<HTMLDivElement | null>(null)
+const { project, dimensions, getViewport } = useVueFlow({ id: 'flow-editor' })
 
 import InputNode from './nodes/InputNode.vue'
 import OutputNode from './nodes/OutputNode.vue'
@@ -195,13 +200,50 @@ function onNodeDragStop({ node }: { node: { id: string; type?: string; computedP
   }
 }
 
+function getSpawnPosition(nodeWidth = 220, nodeHeight = 160) {
+  const vp = getViewport()
+  const width = dimensions.value.width || editorContainerRef.value?.clientWidth || 800
+  const height = dimensions.value.height || editorContainerRef.value?.clientHeight || 600
+
+  const centerScreen = {
+    x: width / 2,
+    y: height / 2
+  }
+
+  let centerFlow: { x: number; y: number }
+  try {
+    centerFlow = project(centerScreen)
+  } catch {
+    const zoom = vp.zoom || 1
+    centerFlow = {
+      x: (centerScreen.x - (vp.x || 0)) / zoom,
+      y: (centerScreen.y - (vp.y || 0)) / zoom
+    }
+  }
+
+  let x = Math.round(centerFlow.x - nodeWidth / 2)
+  let y = Math.round(centerFlow.y - nodeHeight / 2)
+
+  const existingPositions = new Set(
+    (nodes.value as Array<{ position: { x: number; y: number } }>).map(
+      (n) => `${n.position.x},${n.position.y}`
+    )
+  )
+  while (existingPositions.has(`${x},${y}`)) {
+    x += 20
+    y += 20
+  }
+
+  return { x, y }
+}
+
 function addRegexNode() {
   const id = `regex_${Date.now()}`
   nodes.value.push({
     id,
     type: 'regex',
     label: 'Regex',
-    position: { x: 350, y: 150 },
+    position: getSpawnPosition(220, 180),
     data: { pattern: '', replacement: '', mode: 'match', flags: '' }
   })
 }
@@ -212,7 +254,7 @@ function addStringNode() {
     id,
     type: 'string',
     label: 'String',
-    position: { x: 350, y: 350 },
+    position: getSpawnPosition(220, 140),
     data: { value: '' }
   })
 }
@@ -223,7 +265,7 @@ function addCombineStringsNode() {
     id,
     type: 'combine',
     label: 'Combine Strings',
-    position: { x: 600, y: 350 },
+    position: getSpawnPosition(220, 170),
     data: {}
   })
 }
@@ -234,7 +276,7 @@ function addJoinNode() {
     id,
     type: 'join',
     label: 'Join',
-    position: { x: 600, y: 550 },
+    position: getSpawnPosition(220, 160),
     data: { inputCount: 2 }
   })
 }
@@ -245,7 +287,7 @@ function addSplitNode() {
     id,
     type: 'split',
     label: 'Split',
-    position: { x: 850, y: 550 },
+    position: getSpawnPosition(220, 160),
     data: { outputCount: 2 }
   })
 }
@@ -256,7 +298,7 @@ function addCounterNode() {
     id,
     type: 'counter',
     label: 'Counter',
-    position: { x: 350, y: 550 },
+    position: getSpawnPosition(220, 180),
     data: { startMode: 'manual', startValue: 0, step: 1 }
   })
 }
@@ -267,7 +309,7 @@ function addCoalesceNode() {
     id,
     type: 'coalesce',
     label: 'Coalesce',
-    position: { x: 600, y: 700 },
+    position: getSpawnPosition(220, 160),
     data: { inputCount: 2 }
   })
 }
@@ -278,7 +320,7 @@ function addCompareNode() {
     id,
     type: 'compare',
     label: 'Compare',
-    position: { x: 600, y: 850 },
+    position: getSpawnPosition(220, 160),
     data: { operator: 'equals' }
   })
 }
@@ -289,7 +331,7 @@ function addIfNode() {
     id,
     type: 'if',
     label: 'If',
-    position: { x: 850, y: 850 },
+    position: getSpawnPosition(220, 170),
     data: {}
   })
 }
@@ -300,7 +342,7 @@ function addGroupNode() {
     id,
     type: 'group',
     label: 'Group',
-    position: { x: 500, y: 250 },
+    position: getSpawnPosition(420, 260),
     width: 420,
     height: 260,
     data: {}
