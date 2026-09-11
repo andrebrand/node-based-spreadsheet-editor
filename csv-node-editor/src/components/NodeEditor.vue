@@ -45,6 +45,7 @@
       @connect="onConnect"
       @nodes-change="onNodesChange"
       @node-drag-stop="onNodeDragStop"
+      @node-double-click="onNodeDoubleClick"
       @edge-double-click="onEdgeDoubleClick"
       @click="closeMenu()"
       fit-view-on-init
@@ -59,7 +60,7 @@
 import { ref } from 'vue'
 import { markRaw } from 'vue'
 import { addEdge, ConnectionMode, useVueFlow, VueFlow } from '@vue-flow/core'
-import type { Connection, Edge, EdgeMouseEvent, NodeChange } from '@vue-flow/core'
+import type { Connection, Edge, EdgeMouseEvent, NodeChange, NodeMouseEvent } from '@vue-flow/core'
 import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -179,24 +180,196 @@ function onNodesChange(changes: NodeChange[]) {
 function onNodeDragStop({ node }: { node: { id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; parentNode?: string; position: { x: number; y: number } } }) {
   if (node.type === 'group') return
 
-  const nodeList = nodes.value as Array<{ id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; position: { x: number; y: number }; parentNode?: string }>
-  const group = nodeList.find((candidate) => candidate.type === 'group')
-  if (!group?.computedPosition || !group.dimensions || !node.computedPosition || !node.dimensions) return
+  const nodeList = nodes.value as Array<{ id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; position: { x: number; y: number }; parentNode?: string; data?: any; width?: number; height?: number }>
+  const groups = nodeList.filter((candidate) => candidate.type === 'group')
+  const matchingGroup = groups.find((candidate) => {
+    const groupWidth = candidate.data?.width || candidate.width || candidate.dimensions?.width
+    const groupHeight = candidate.data?.height || candidate.height || candidate.dimensions?.height
+    if (!candidate?.computedPosition || !groupWidth || !groupHeight || !node.computedPosition || !node.dimensions) return false
+    return (
+      node.computedPosition.x >= candidate.computedPosition.x &&
+      node.computedPosition.y >= candidate.computedPosition.y &&
+      node.computedPosition.x + node.dimensions.width <= candidate.computedPosition.x + groupWidth &&
+      node.computedPosition.y + node.dimensions.height <= candidate.computedPosition.y + groupHeight
+    )
+  })
 
-  const insideGroup = node.computedPosition.x >= group.computedPosition.x &&
-    node.computedPosition.y >= group.computedPosition.y &&
-    node.computedPosition.x + node.dimensions.width <= group.computedPosition.x + group.dimensions.width &&
-    node.computedPosition.y + node.dimensions.height <= group.computedPosition.y + group.dimensions.height
-
-  if (insideGroup && node.parentNode !== group.id) {
-    node.parentNode = group.id
+  if (matchingGroup?.computedPosition && node.computedPosition && node.parentNode !== matchingGroup.id) {
+    node.parentNode = matchingGroup.id
     node.position = {
-      x: node.computedPosition.x - group.computedPosition.x,
-      y: node.computedPosition.y - group.computedPosition.y
+      x: node.computedPosition.x - matchingGroup.computedPosition.x,
+      y: node.computedPosition.y - matchingGroup.computedPosition.y
     }
-  } else if (!insideGroup && node.parentNode === group.id) {
+  } else if (!matchingGroup && node.parentNode && node.computedPosition) {
     node.parentNode = undefined
     node.position = { x: node.computedPosition.x, y: node.computedPosition.y }
+  }
+}
+
+function copyRegularNode(node: any) {
+  const nodeList = nodes.value as any[]
+  const source = nodeList.find((n) => n.id === node.id) || node
+
+  let offsetX = 30
+  let offsetY = 30
+  const existingPositions = new Set(
+    nodeList.map((n) => `${n.position.x},${n.position.y}`)
+  )
+  while (existingPositions.has(`${source.position.x + offsetX},${source.position.y + offsetY}`)) {
+    offsetX += 20
+    offsetY += 20
+  }
+
+  const newId = `${source.type || 'node'}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+  const newNode = {
+    id: newId,
+    type: source.type,
+    label: source.label,
+    position: {
+      x: source.position.x + offsetX,
+      y: source.position.y + offsetY
+    },
+    parentNode: source.parentNode,
+    data: JSON.parse(JSON.stringify(source.data || {}))
+  }
+
+  ;(nodes.value as any[]).push(newNode)
+}
+
+function copyGroupNode(group: any) {
+  const nodeList = nodes.value as any[]
+  const sourceGroup = nodeList.find((n) => n.id === group.id) || group
+
+  // Width and height are tracked directly by the GroupNode when scaling
+  const groupWidth = sourceGroup.data?.width || sourceGroup.width || 420
+  const groupHeight = sourceGroup.data?.height || sourceGroup.height || 260
+
+  // Find all child nodes inside this group
+  const groupCompPos = group.computedPosition || sourceGroup.computedPosition || sourceGroup.position
+  const innerNodes = nodeList.filter((n) => {
+    if (n.id === sourceGroup.id || n.type === 'input' || n.type === 'output') return false
+    if (n.parentNode === sourceGroup.id) return true
+
+    const childCompPos = n.computedPosition || n.position
+    const childDim = n.dimensions || { width: 220, height: 160 }
+
+    if (groupCompPos && childCompPos) {
+      return (
+        childCompPos.x >= groupCompPos.x &&
+        childCompPos.y >= groupCompPos.y &&
+        childCompPos.x + childDim.width <= groupCompPos.x + groupWidth &&
+        childCompPos.y + childDim.height <= groupCompPos.y + groupHeight
+      )
+    }
+    return false
+  })
+
+  // Group offset to avoid stacking directly on top of original
+  let offsetX = 40
+  let offsetY = 40
+  const existingPositions = new Set(
+    nodeList.map((n) => `${n.position.x},${n.position.y}`)
+  )
+  while (existingPositions.has(`${sourceGroup.position.x + offsetX},${sourceGroup.position.y + offsetY}`)) {
+    offsetX += 20
+    offsetY += 20
+  }
+
+  const idMap = new Map<string, string>()
+  const newGroupId = `group_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+  idMap.set(sourceGroup.id, newGroupId)
+
+  for (const child of innerNodes) {
+    const newChildId = `${child.type || 'node'}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+    idMap.set(child.id, newChildId)
+  }
+
+  const newGroupNode = {
+    id: newGroupId,
+    type: 'group',
+    label: sourceGroup.label || 'Group',
+    position: {
+      x: sourceGroup.position.x + offsetX,
+      y: sourceGroup.position.y + offsetY
+    },
+    width: groupWidth,
+    height: groupHeight,
+    style: {
+      ...(sourceGroup.style || {}),
+      width: `${groupWidth}px`,
+      height: `${groupHeight}px`
+    },
+    data: {
+      ...JSON.parse(JSON.stringify(sourceGroup.data || {})),
+      width: groupWidth,
+      height: groupHeight
+    }
+  }
+
+  const newChildNodes = innerNodes.map((child) => {
+    let relPos = { ...child.position }
+    const childPos = child.computedPosition || child.position
+    if (!child.parentNode && groupCompPos && childPos) {
+      relPos = {
+        x: childPos.x - groupCompPos.x,
+        y: childPos.y - groupCompPos.y
+      }
+    }
+
+    return {
+      id: idMap.get(child.id)!,
+      type: child.type,
+      label: child.label,
+      position: relPos,
+      parentNode: newGroupId,
+      data: JSON.parse(JSON.stringify(child.data || {}))
+    }
+  })
+
+  // Duplicate internal connections between inner nodes and group internal ports
+  const edgeList = edges.value as Edge[]
+  const newEdges: Edge[] = []
+
+  edgeList.forEach((e) => {
+    if (idMap.has(e.source) && idMap.has(e.target)) {
+      const newSource = idMap.get(e.source)!
+      const newTarget = idMap.get(e.target)!
+      newEdges.push({
+        ...e,
+        id: `e_${newSource}_${e.sourceHandle || ''}-${newTarget}_${e.targetHandle || ''}`,
+        source: newSource,
+        target: newTarget
+      })
+    }
+  })
+
+  ;(nodes.value as any[]).push(newGroupNode, ...newChildNodes)
+  if (newEdges.length > 0) {
+    ;(edges.value as any[]).push(...newEdges)
+  }
+}
+
+function onNodeDoubleClick(event: NodeMouseEvent) {
+  const domEvent = event.event
+  const target = domEvent?.target as HTMLElement | null
+
+  // Ignore double clicks on inputs, selects, buttons, title editing, handles, or resize controls
+  if (target && target.closest('input, select, textarea, button, a, .vue-flow__resize-control, .vue-flow__handle, .node-title-text')) {
+    return
+  }
+
+  const node = event.node
+  if (!node) return
+
+  // Do not duplicate singleton input or output nodes
+  if (node.id === 'node_input' || node.id === 'node_output' || node.type === 'input' || node.type === 'output') {
+    return
+  }
+
+  if (node.type === 'group') {
+    copyGroupNode(node)
+  } else {
+    copyRegularNode(node)
   }
 }
 
@@ -345,7 +518,14 @@ function addGroupNode() {
     position: getSpawnPosition(420, 260),
     width: 420,
     height: 260,
-    data: {}
+    style: {
+      width: '420px',
+      height: '260px'
+    },
+    data: {
+      width: 420,
+      height: 260
+    }
   })
 }
 </script>
