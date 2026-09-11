@@ -14,6 +14,8 @@
 
       <button class="small-node-btn" type="button" @click="addOutput">+ Output</button>
       <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
+      <button class="small-node-btn nodrag" type="button" @click="addOutput">+ Output</button>
+      <button class="delete-node-btn nodrag" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

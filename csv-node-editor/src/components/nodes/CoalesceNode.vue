@@ -8,6 +8,7 @@
       </div>
 
       <button class="small-node-btn" type="button" @click="addInput">+ Input</button>
+      <button class="small-node-btn nodrag" type="button" @click="addInput">+ Input</button>
 
       <div class="port-row right">
         <span>Output</span>
@@ -15,6 +16,7 @@
       </div>
 
       <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
+      <button class="delete-node-btn nodrag" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

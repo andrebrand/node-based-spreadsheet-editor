@@ -10,16 +10,19 @@
       <div class="controls">
         <label>Mode:</label>
         <select v-model="data.mode">
+        <select v-model="data.mode" class="nodrag">
           <option value="match">Filter Match</option>
           <option value="replace">Replace</option>
         </select>
 
         <label>Regex Pattern:</label>
         <input type="text" v-model="data.pattern" placeholder="z.B. \d+" />
+        <input class="nodrag" type="text" v-model="data.pattern" placeholder="z.B. \d+" />
 
         <template v-if="data.mode === 'replace'">
           <label>Ersatz-Text:</label>
           <input type="text" v-model="data.replacement" placeholder="Ersatz..." />
+          <input class="nodrag" type="text" v-model="data.replacement" placeholder="Ersatz..." />
         </template>
       </div>
 
@@ -29,6 +32,7 @@
       </div>
 
       <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
+      <button class="delete-node-btn nodrag" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

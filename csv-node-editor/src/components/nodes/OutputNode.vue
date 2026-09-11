@@ -5,11 +5,13 @@
       <div class="add-column">
         <input 
           v-model="newCol" 
+          class="nodrag"
           placeholder="Neue Spalte..." 
           @keyup.enter="addColumn" 
           @paste.prevent="pasteColumns"
         />
         <button @click="addColumn">+</button>
+        <button class="nodrag" @click="addColumn">+</button>
       </div>
 
       <div
@@ -38,6 +40,7 @@
           {{ col }}
         </span>
         <button class="remove-btn" @click="removeColumn(col)">×</button>
+        <button class="remove-btn nodrag" @click="removeColumn(col)">×</button>
       </div>
     </div>
   </div>

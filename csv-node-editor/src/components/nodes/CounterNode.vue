@@ -5,6 +5,7 @@
       <div class="controls">
         <label>Input method:</label>
         <select v-model="data.startMode">
+        <select v-model="data.startMode" class="nodrag">
           <option value="manual">Static</option>
           <option value="input">Node</option>
         </select>
@@ -12,6 +13,7 @@
           <label>Start value:</label>
           <input
             v-model.number="data.startValue"
+            class="nodrag"
             type="number"
             placeholder="Start value"
           />
@@ -26,6 +28,7 @@
       <div class="controls">
         <label>Step size:</label>
         <input v-model.number="data.step" type="number" placeholder="1" />
+        <input v-model.number="data.step" class="nodrag" type="number" placeholder="1" />
       </div>
 
       <div class="port-row right">
@@ -34,6 +37,7 @@
       </div>
 
       <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
+      <button class="delete-node-btn nodrag" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

@@ -7,6 +7,7 @@
         <input
           id="string-value"
           v-model="data.value"
+          class="nodrag"
           type="text"
           placeholder="Input text..."
         />
@@ -18,6 +19,7 @@
       </div>
 
       <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
+      <button class="delete-node-btn nodrag" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

@@ -15,6 +15,7 @@
       <div class="controls">
         <label>Compare:</label>
         <select v-model="data.operator">
+        <select v-model="data.operator" class="nodrag">
           <option value="equals">Is Equal</option>
           <option value="not-equals">Is Not Equal</option>
           <option value="contains">Contains</option>
@@ -29,6 +30,7 @@
       </div>
 
       <button class="delete-node-btn" type="button" @click="deleteNode">Delete node</button>
+      <button class="delete-node-btn nodrag" type="button" @click="deleteNode">Delete node</button>
     </div>
   </div>
 </template>

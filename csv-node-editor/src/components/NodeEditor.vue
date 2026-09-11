@@ -1,5 +1,10 @@
 <template>
   <div class="editor-container">
+  <div
+    class="editor-container"
+    @pointerdown.capture="preventDragOnInteractive"
+    @mousedown.capture="preventDragOnInteractive"
+  >
     <div class="toolbar">
       <div class="node-menu">
         <button class="node-menu-toggle" type="button" :aria-expanded="openMenu === 'strings'" @click="toggleMenu('strings')">
@@ -85,6 +90,15 @@ function toggleMenu(menu: 'strings' | 'arrays') {
 
 function closeMenu() {
   openMenu.value = null
+}
+
+function preventDragOnInteractive(event: Event) {
+  const target = event.target as HTMLElement | null
+  if (!target) return
+  const interactive = target.closest('input, select, textarea, button')
+  if (interactive && !interactive.classList.contains('nodrag')) {
+    interactive.classList.add('nodrag')
+  }
 }
 
 const nodeTypes: NodeTypesObject = {
