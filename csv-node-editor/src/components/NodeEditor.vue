@@ -202,7 +202,7 @@ function addRegexNode() {
     type: 'regex',
     label: 'Regex',
     position: { x: 350, y: 150 },
-    data: { pattern: '', replacement: '', mode: 'match', flags: 'g' }
+    data: { pattern: '', replacement: '', mode: 'match', flags: '' }
   })
 }
 

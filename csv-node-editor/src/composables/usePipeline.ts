@@ -171,7 +171,7 @@ export const outputTable = computed(() => {
     if (sourceNode.type === 'regex') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input')
       const pattern = sourceNode.data?.pattern || ''
-      const flags = sourceNode.data?.flags || 'g'
+      const flags = sourceNode.data?.flags || ''
       const mode = sourceNode.data?.mode || 'match' // 'match' oder 'replace'
       const replacement = sourceNode.data?.replacement || ''
 
