@@ -7,6 +7,14 @@
       @resize-end="onResize"
     />
     <NodeTitle v-model:label="data.label" default-label="🔳 Group Node" header-class="group-node-header" />
+    <button
+      class="group-save-btn nodrag"
+      type="button"
+      title="GroupNode als Preset speichern"
+      @click.stop="handleSavePreset"
+    >
+      {{ saveStatus === 'saved' ? '✓ Gespeichert' : '💾 Preset' }}
+    </button>
 
     <div class="group-port outer-input">
       <Handle id="input" type="target" :position="Position.Left" />
@@ -33,17 +41,33 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import { NodeResizer } from '@vue-flow/node-resizer'
 import type { OnResize, OnResizeEnd } from '@vue-flow/node-resizer'
 import type { NodeProps } from '@vue-flow/core'
 import NodeTitle from './NodeTitle.vue'
 import { nodes } from '../../composables/usePipeline'
+import { isDefaultGroupName, openNamingDialog, saveGroupAsPreset } from '../../composables/usePresets'
 
 const props = defineProps<NodeProps<{ label?: string; width?: number; height?: number }>>()
 
 const { removeNodes, findNode } = useVueFlow()
+
+const saveStatus = ref<'idle' | 'saved'>('idle')
+
+function handleSavePreset() {
+  const currentLabel = props.data?.label || (props as any).label
+  if (isDefaultGroupName(currentLabel)) {
+    openNamingDialog(props.id, '')
+  } else {
+    saveGroupAsPreset(props.id, currentLabel)
+    saveStatus.value = 'saved'
+    setTimeout(() => {
+      saveStatus.value = 'idle'
+    }, 1500)
+  }
+}
 
 function deleteNode() {
   removeNodes([props.id])

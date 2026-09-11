@@ -32,6 +32,28 @@
           <button @click="addSplitNode(); closeMenu()">+ Split Node</button>
         </div>
       </div>
+      <!-- Preset Dropdown Menu: only shown if presets.length > 0 -->
+      <div v-if="presets.length > 0" class="node-menu preset-menu">
+        <button class="node-menu-toggle preset-menu-toggle" type="button" :aria-expanded="openMenu === 'presets'" @click="toggleMenu('presets')">
+          <span>📦 Presets ({{ presets.length }})</span>
+          <span class="menu-chevron" :class="{ open: openMenu === 'presets' }" aria-hidden="true"></span>
+        </button>
+        <div v-if="openMenu === 'presets'" class="node-menu-items preset-menu-items">
+          <div v-for="preset in presets" :key="preset.id" class="preset-menu-item">
+            <button class="preset-spawn-btn" type="button" @click="handleSpawnPreset(preset); closeMenu()">
+              <span>🔳 {{ preset.name }}</span>
+            </button>
+            <button
+              class="preset-delete-btn"
+              type="button"
+              title="Preset löschen"
+              @click.stop="deletePreset(preset.id)"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <VueFlow
       id="flow-editor"
@@ -53,11 +75,39 @@
       <Background  />
       <Controls />
     </VueFlow>
+
+    <!-- Naming Dialog Modal -->
+    <div v-if="namingDialog.isOpen" class="modal-backdrop" @click.self="closeNamingDialog">
+      <div class="modal-dialog">
+        <h3 class="modal-title">Preset Name vergeben</h3>
+        <p class="modal-desc">Bitte gib einen Namen für das GroupNode-Preset ein:</p>
+        <input
+          ref="presetNameInputRef"
+          v-model="namingDialog.name"
+          class="modal-input nodrag"
+          type="text"
+          placeholder="z.B. Datenbereinigung"
+          @keydown.enter.prevent="submitNamingDialog"
+          @keydown.escape.prevent="closeNamingDialog"
+        />
+        <div class="modal-actions">
+          <button class="modal-btn cancel" type="button" @click="closeNamingDialog">Abbrechen</button>
+          <button
+            class="modal-btn confirm"
+            type="button"
+            :disabled="!namingDialog.name.trim()"
+            @click="submitNamingDialog"
+          >
+            Speichern
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { markRaw } from 'vue'
 import { addEdge, ConnectionMode, useVueFlow, VueFlow } from '@vue-flow/core'
 import type { Connection, Edge, EdgeMouseEvent, NodeChange, NodeMouseEvent } from '@vue-flow/core'
@@ -65,9 +115,40 @@ import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { nodes, edges } from '../composables/usePipeline'
+import {
+  presets,
+  namingDialog,
+  deletePreset,
+  spawnPreset,
+  closeNamingDialog,
+  confirmNamingDialog,
+  type GroupPreset
+} from '../composables/usePresets'
 
 const editorContainerRef = ref<HTMLDivElement | null>(null)
+const presetNameInputRef = ref<HTMLInputElement | null>(null)
 const { project, dimensions, getViewport } = useVueFlow({ id: 'flow-editor' })
+
+watch(
+  () => namingDialog.value.isOpen,
+  (isOpen) => {
+    if (isOpen) {
+      nextTick(() => {
+        presetNameInputRef.value?.focus()
+        presetNameInputRef.value?.select()
+      })
+    }
+  }
+)
+
+function submitNamingDialog() {
+  confirmNamingDialog()
+}
+
+function handleSpawnPreset(preset: GroupPreset) {
+  const spawnPos = getSpawnPosition(preset.width, preset.height)
+  spawnPreset(preset, spawnPos)
+}
 
 import InputNode from './nodes/InputNode.vue'
 import OutputNode from './nodes/OutputNode.vue'
@@ -87,9 +168,9 @@ const props = defineProps<{
   onInputDelete: () => void
 }>()
 
-const openMenu = ref<'strings' | 'arrays' | null>(null)
+const openMenu = ref<'strings' | 'arrays' | 'presets' | null>(null)
 
-function toggleMenu(menu: 'strings' | 'arrays') {
+function toggleMenu(menu: 'strings' | 'arrays' | 'presets') {
   openMenu.value = openMenu.value === menu ? null : menu
 }
 

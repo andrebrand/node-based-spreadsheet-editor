@@ -31,7 +31,7 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .menu-chevron { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform 0.15s ease; }
 .menu-chevron.open { transform: rotate(225deg) translate(-1px, -1px); }
 .node-menu-items { position: absolute; top: calc(100% + 4px); left: 0; min-width: 200px; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 5px; box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16); }
-.node-menu-items button { display: block; width: 100%; padding: 7px 9px; border: 0; border-radius: 3px; background: transparent; color: #1e293b; text-align: left; cursor: pointer; }
+.node-menu-items button { display: block; padding: 7px 9px; border: 0; border-radius: 3px; background: transparent; color: #1e293b; text-align: left; cursor: pointer; }
 .node-menu-items button:hover { background: #e2e8f0; }
 
 /* Custom Node Base Styles */
@@ -94,4 +94,166 @@ tbody tr:hover { background-color: #f8fafc; }
 .vue-flow__handle-left { background: #eb8525; }
 .vue-flow__node-input, .vue-flow__node-output {
     width: auto;
+}
+
+/* Group Save Preset Button */
+.group-save-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 5;
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.group-save-btn:hover {
+  background: #ddd6fe;
+  border-color: #a78bfa;
+}
+
+/* Preset Menu & Toolbar */
+.preset-menu-toggle {
+  background: #059669;
+}
+.preset-menu-toggle:hover {
+  background: #047857;
+}
+.preset-menu-items {
+  min-width: 220px;
+}
+.preset-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  border-radius: 4px;
+}
+
+.preset-spawn-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 0;
+  background: transparent;
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width:80%;
+}
+.node-menu-items button.preset-delete-btn {
+  border: 0;
+  background: transparent;
+  padding: 3px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 20px;
+  transition: all 0.15s ease;
+  width:20%;
+  text-align:center;
+  display:flex;
+  justify-content: center;
+  color: #dc2626;
+}
+.node-menu-items button.preset-delete-btn:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+/* Naming Dialog Modal */
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-dialog {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.modal-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+.modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+.modal-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.modal-btn {
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.modal-btn.cancel {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+}
+.modal-btn.cancel:hover {
+  background: #f1f5f9;
+}
+.modal-btn.confirm {
+  border: none;
+  background: #2563eb;
+  color: white;
+}
+.modal-btn.confirm:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+.modal-btn.confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
