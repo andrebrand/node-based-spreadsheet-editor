@@ -10,26 +10,37 @@
       <input ref="planFileInput" class="hidden-file-input" type="file" accept=".json" @change="handlePlanLoad" />
     </header>
 
-    <div ref="mainContentRef" class="main-content" :class="{ 'is-resizing': isResizing }">
+    <div
+      ref="mainContentRef"
+      class="main-content"
+      :class="['position-' + previewPosition, { 'is-resizing': isResizing }]"
+    >
       <div class="editor-pane">
         <NodeEditor :flow-key="flowKey" :on-input-delete="resetApp" />
       </div>
       <div
         class="pane-resizer nodrag"
-        :class="{ 'is-dragging': isResizing }"
+        :class="['resizer-' + previewPosition, { 'is-dragging': isResizing }]"
         role="separator"
-        aria-orientation="vertical"
+        :aria-orientation="previewPosition === 'right' ? 'vertical' : 'horizontal'"
         tabindex="0"
-        title="Breite der Vorschau anpassen (Doppelklick zum Zurücksetzen)"
+        :title="previewPosition === 'right'
+          ? 'Breite der Vorschau anpassen (Doppelklick zum Zurücksetzen)'
+          : 'Höhe der Vorschau anpassen (Doppelklick zum Zurücksetzen)'"
         @pointerdown="startResize"
-        @dblclick="resetPreviewWidth"
-        @keydown.left.prevent="stepResize(20)"
-        @keydown.right.prevent="stepResize(-20)"
+        @dblclick="resetPreviewSize"
+        @keydown.left.prevent="previewPosition === 'right' && stepResize(20)"
+        @keydown.right.prevent="previewPosition === 'right' && stepResize(-20)"
+        @keydown.up.prevent="previewPosition === 'bottom' && stepResize(20)"
+        @keydown.down.prevent="previewPosition === 'bottom' && stepResize(-20)"
       >
         <div class="resizer-handle"></div>
       </div>
-      <div class="preview-pane" :style="{ width: `${previewWidth}px`, flex: 'none' }">
-        <TablePreview />
+      <div class="preview-pane" :style="previewPaneStyle">
+        <TablePreview
+          :position="previewPosition"
+          @toggle-position="togglePreviewPosition"
+        />
       </div>
     </div>
   </div>
@@ -39,7 +50,7 @@
 import * as XLSX from 'xlsx'
 import NodeEditor from './components/NodeEditor.vue'
 import TablePreview from './components/TablePreview.vue'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { Edge, Node } from '@vue-flow/core'
 import { rawData, nodes, edges } from './composables/usePipeline'
 
@@ -48,26 +59,71 @@ const planFileInput = ref<HTMLInputElement | null>(null)
 const flowKey = ref(0)
 
 const mainContentRef = ref<HTMLDivElement | null>(null)
+const previewPosition = ref<'right' | 'bottom'>(
+  (typeof window !== 'undefined' && (localStorage.getItem('csv_editor_preview_position') as any)) || 'right'
+)
+
 const defaultPreviewWidth = 650
+const defaultPreviewHeight = 320
+
 const savedWidth = typeof window !== 'undefined' ? localStorage.getItem('csv_editor_preview_pane_width') : null
+const savedHeight = typeof window !== 'undefined' ? localStorage.getItem('csv_editor_preview_pane_height') : null
+
 const previewWidth = ref<number>(savedWidth ? Math.max(240, parseFloat(savedWidth)) : defaultPreviewWidth)
+const previewHeight = ref<number>(savedHeight ? Math.max(140, parseFloat(savedHeight)) : defaultPreviewHeight)
 const isResizing = ref(false)
+
+const previewPaneStyle = computed(() => {
+  if (previewPosition.value === 'bottom') {
+    return {
+      height: `${previewHeight.value}px`,
+      width: '100%',
+      flex: 'none'
+    }
+  }
+  return {
+    width: `${previewWidth.value}px`,
+    height: '100%',
+    flex: 'none'
+  }
+})
+
+function togglePreviewPosition() {
+  previewPosition.value = previewPosition.value === 'right' ? 'bottom' : 'right'
+  localStorage.setItem('csv_editor_preview_position', previewPosition.value)
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'))
+  }, 50)
+}
 
 function startResize(event: PointerEvent) {
   event.preventDefault()
   isResizing.value = true
 
   const startX = event.clientX
+  const startY = event.clientY
   const startWidth = previewWidth.value
+  const startHeight = previewHeight.value
+  const isRight = previewPosition.value === 'right'
 
   const onPointerMove = (e: PointerEvent) => {
     if (!isResizing.value) return
-    const deltaX = startX - e.clientX
-    const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
-    const minWidth = 240
-    const maxWidth = Math.max(minWidth, containerWidth - 300)
-    const nextWidth = Math.min(maxWidth, Math.max(minWidth, startWidth + deltaX))
-    previewWidth.value = Math.round(nextWidth)
+
+    if (isRight) {
+      const deltaX = startX - e.clientX
+      const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
+      const minWidth = 240
+      const maxWidth = Math.max(minWidth, containerWidth - 300)
+      const nextWidth = Math.min(maxWidth, Math.max(minWidth, startWidth + deltaX))
+      previewWidth.value = Math.round(nextWidth)
+    } else {
+      const deltaY = startY - e.clientY
+      const containerHeight = mainContentRef.value?.clientHeight || window.innerHeight
+      const minHeight = 140
+      const maxHeight = Math.max(minHeight, containerHeight - 200)
+      const nextHeight = Math.min(maxHeight, Math.max(minHeight, startHeight + deltaY))
+      previewHeight.value = Math.round(nextHeight)
+    }
   }
 
   const onPointerUp = () => {
@@ -75,7 +131,12 @@ function startResize(event: PointerEvent) {
     window.removeEventListener('pointermove', onPointerMove)
     window.removeEventListener('pointerup', onPointerUp)
     window.removeEventListener('pointercancel', onPointerUp)
-    localStorage.setItem('csv_editor_preview_pane_width', String(previewWidth.value))
+
+    if (isRight) {
+      localStorage.setItem('csv_editor_preview_pane_width', String(previewWidth.value))
+    } else {
+      localStorage.setItem('csv_editor_preview_pane_height', String(previewHeight.value))
+    }
     window.dispatchEvent(new Event('resize'))
   }
 
@@ -84,27 +145,48 @@ function startResize(event: PointerEvent) {
   window.addEventListener('pointercancel', onPointerUp)
 }
 
-function resetPreviewWidth() {
-  previewWidth.value = defaultPreviewWidth
-  localStorage.setItem('csv_editor_preview_pane_width', String(defaultPreviewWidth))
+function resetPreviewSize() {
+  if (previewPosition.value === 'right') {
+    previewWidth.value = defaultPreviewWidth
+    localStorage.setItem('csv_editor_preview_pane_width', String(defaultPreviewWidth))
+  } else {
+    previewHeight.value = defaultPreviewHeight
+    localStorage.setItem('csv_editor_preview_pane_height', String(defaultPreviewHeight))
+  }
   window.dispatchEvent(new Event('resize'))
 }
 
 function stepResize(delta: number) {
-  const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
-  const minWidth = 240
-  const maxWidth = Math.max(minWidth, containerWidth - 300)
-  previewWidth.value = Math.min(maxWidth, Math.max(minWidth, previewWidth.value + delta))
-  localStorage.setItem('csv_editor_preview_pane_width', String(previewWidth.value))
+  if (previewPosition.value === 'right') {
+    const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
+    const minWidth = 240
+    const maxWidth = Math.max(minWidth, containerWidth - 300)
+    previewWidth.value = Math.min(maxWidth, Math.max(minWidth, previewWidth.value + delta))
+    localStorage.setItem('csv_editor_preview_pane_width', String(previewWidth.value))
+  } else {
+    const containerHeight = mainContentRef.value?.clientHeight || window.innerHeight
+    const minHeight = 140
+    const maxHeight = Math.max(minHeight, containerHeight - 200)
+    previewHeight.value = Math.min(maxHeight, Math.max(minHeight, previewHeight.value + delta))
+    localStorage.setItem('csv_editor_preview_pane_height', String(previewHeight.value))
+  }
   window.dispatchEvent(new Event('resize'))
 }
 
 function handleWindowResize() {
-  const containerWidth = mainContentRef.value?.clientWidth || window.innerWidth
-  const minWidth = 240
-  const maxWidth = Math.max(minWidth, containerWidth - 300)
-  if (previewWidth.value > maxWidth) {
-    previewWidth.value = maxWidth
+  if (!mainContentRef.value) return
+  if (previewPosition.value === 'right') {
+    const containerWidth = mainContentRef.value.clientWidth || window.innerWidth
+    const maxWidth = Math.max(240, containerWidth - 300)
+    if (previewWidth.value > maxWidth) {
+      previewWidth.value = maxWidth
+    }
+  } else {
+    const containerHeight = mainContentRef.value.clientHeight || window.innerHeight
+    const maxHeight = Math.max(140, containerHeight - 200)
+    if (previewHeight.value > maxHeight) {
+      previewHeight.value = maxHeight
+    }
   }
 }
 

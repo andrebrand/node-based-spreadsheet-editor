@@ -1,13 +1,26 @@
 <template>
   <div class="table-preview">
     <div class="table-preview-header">
-      <h3>Preview table</h3>
-      <div v-if="outputTable.headers.length" class="download-buttons">
-        <button class="download-csv-btn" type="button" @click="downloadCsv">
-          Download CSV
-        </button>
-        <button class="download-excel-btn" type="button" @click="downloadExcel">
-          Download Excel
+      <div class="table-preview-title-group">
+        <h3>Preview table</h3>
+      </div>
+      <div class="table-preview-actions">
+        <div v-if="outputTable.headers.length" class="download-buttons">
+          <button class="download-csv-btn" type="button" @click="downloadCsv">
+            Download CSV
+          </button>
+          <button class="download-excel-btn" type="button" @click="downloadExcel">
+            Download Excel
+          </button>
+        </div>
+        <button
+          class="layout-toggle-btn"
+          type="button"
+          :title="position === 'bottom' ? 'Dock preview to right side' : 'Dock preview to bottom'"
+          @click="$emit('toggle-position')"
+        >
+          <span v-if="position === 'bottom'">⬌ Dock Right</span>
+          <span v-else>⬍ Dock Bottom</span>
         </button>
       </div>
     </div>
@@ -34,6 +47,19 @@
 <script setup lang="ts">
 import * as XLSX from 'xlsx'
 import { outputTable } from '../composables/usePipeline'
+
+withDefaults(
+  defineProps<{
+    position?: 'right' | 'bottom'
+  }>(),
+  {
+    position: 'right'
+  }
+)
+
+defineEmits<{
+  (e: 'toggle-position'): void
+}>()
 
 function escapeCsvValue(value: unknown) {
   const text = String(value ?? '')

@@ -20,15 +20,17 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 }
 
 .main-content { display: flex; flex: 1; height: calc(100vh - 60px); position: relative; overflow: hidden; }
-.editor-pane { flex: 1; min-width: 300px; position: relative; height: 100%; }
-.preview-pane { background: white; overflow: hidden; padding: 15px; display: flex; flex-direction: column; min-width: 240px; min-height: 0; height: 100%; box-shadow: -2px 0 6px rgba(0, 0, 0, 0.04); }
+.main-content.position-right { flex-direction: row; }
+.main-content.position-bottom { flex-direction: column; }
+
+.main-content.position-right .editor-pane { flex: 1; min-width: 300px; position: relative; height: 100%; }
+.main-content.position-bottom .editor-pane { flex: 1; min-height: 200px; position: relative; width: 100%; }
+
+.main-content.position-right .preview-pane { background: white; overflow: hidden; padding: 15px; display: flex; flex-direction: column; min-width: 240px; min-height: 0; height: 100%; box-shadow: -2px 0 6px rgba(0, 0, 0, 0.04); }
+.main-content.position-bottom .preview-pane { background: white; overflow: hidden; padding: 15px; display: flex; flex-direction: column; width: 100%; min-height: 140px; box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.04); }
 
 /* Resizer between Editor and Preview */
 .pane-resizer {
-  width: 12px;
-  margin-left: -6px;
-  margin-right: -6px;
-  cursor: col-resize;
   position: relative;
   z-index: 20;
   background: transparent;
@@ -39,22 +41,57 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
   touch-action: none;
   outline: none;
 }
-.resizer-handle {
+
+.pane-resizer.resizer-right {
+  width: 12px;
+  height: 100%;
+  margin-left: -6px;
+  margin-right: -6px;
+  cursor: col-resize;
+}
+.pane-resizer.resizer-right .resizer-handle {
   width: 2px;
   height: 100%;
   background: #cbd5e1;
   transition: background 0.15s ease, width 0.15s ease;
   pointer-events: none;
 }
-.pane-resizer:hover .resizer-handle,
-.pane-resizer:focus .resizer-handle,
-.pane-resizer.is-dragging .resizer-handle {
+.pane-resizer.resizer-right:hover .resizer-handle,
+.pane-resizer.resizer-right:focus .resizer-handle,
+.pane-resizer.resizer-right.is-dragging .resizer-handle {
   background: #2563eb;
   width: 4px;
 }
+
+.pane-resizer.resizer-bottom {
+  width: 100%;
+  height: 12px;
+  margin-top: -6px;
+  margin-bottom: -6px;
+  cursor: row-resize;
+}
+.pane-resizer.resizer-bottom .resizer-handle {
+  width: 100%;
+  height: 2px;
+  background: #cbd5e1;
+  transition: background 0.15s ease, height 0.15s ease;
+  pointer-events: none;
+}
+.pane-resizer.resizer-bottom:hover .resizer-handle,
+.pane-resizer.resizer-bottom:focus .resizer-handle,
+.pane-resizer.resizer-bottom.is-dragging .resizer-handle {
+  background: #2563eb;
+  height: 4px;
+}
+
 .main-content.is-resizing {
   user-select: none;
+}
+.main-content.position-right.is-resizing {
   cursor: col-resize;
+}
+.main-content.position-bottom.is-resizing {
+  cursor: row-resize;
 }
 .main-content.is-resizing * {
   pointer-events: none;
@@ -115,6 +152,26 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .table-preview { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; flex: 1; }
 .table-preview-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; margin-bottom: 12px; }
 .table-preview-header h3 { margin: 0; font-size: 16px; color: #1e293b; }
+.table-preview-actions { display: flex; align-items: center; gap: 8px; }
+.layout-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+.layout-toggle-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
 .download-buttons { display: flex; gap: 6px; }
 .download-csv-btn { padding: 6px 10px; border: 0; border-radius: 4px; background: #0f766e; color: white; cursor: pointer; font-size: 12px; }
 .download-csv-btn:hover { background: #115e59; }
