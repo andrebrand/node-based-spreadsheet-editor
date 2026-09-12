@@ -1,6 +1,6 @@
 <template>
     <div class="button-wrapper">
-        <button v-for="(option, index) of options" :key="option.value"
+        <button v-for="option of options" :key="option.value"
             type="button"
             :title="option.title"
             @click="handleChange(option.value)"
