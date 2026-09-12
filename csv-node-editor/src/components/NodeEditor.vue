@@ -46,7 +46,7 @@
             <button
               class="preset-delete-btn"
               type="button"
-              title="Preset löschen"
+              title="Delete Preset"
               @click.stop="deletePreset(preset.id)"
             >
               ×

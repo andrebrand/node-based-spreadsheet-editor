@@ -64,7 +64,7 @@ const previewPosition = ref<'right' | 'bottom'>(
 )
 
 const defaultPreviewWidth = 650
-const defaultPreviewHeight = 320
+const defaultPreviewHeight = 400
 
 const savedWidth = typeof window !== 'undefined' ? localStorage.getItem('csv_editor_preview_pane_width') : null
 const savedHeight = typeof window !== 'undefined' ? localStorage.getItem('csv_editor_preview_pane_height') : null

@@ -13,15 +13,16 @@
             Download Excel
           </button>
         </div>
-        <button
-          class="layout-toggle-btn"
-          type="button"
-          :title="position === 'bottom' ? 'Dock preview to right side' : 'Dock preview to bottom'"
-          @click="$emit('toggle-position')"
-        >
-          <span v-if="position === 'bottom'">⬌ Dock Right</span>
-          <span v-else>⬍ Dock Bottom</span>
-        </button>
+
+        <SwitchButton v-model="props.position" :options="[{
+          title: 'Display the preview on the right side',
+          icon: IconLayoutSidebarRightInactive,
+          value: 'right'
+        },{
+          title: 'Display the preview on the bottom',
+          icon: IconLayoutBottombarInactive,
+          value: 'bottom'
+        }]" @change="$emit('toggle-position')" />
       </div>
     </div>
     <div class="table-wrapper" v-if="outputTable.headers.length">
@@ -47,8 +48,10 @@
 <script setup lang="ts">
 import * as XLSX from 'xlsx'
 import { outputTable } from '../composables/usePipeline'
+import SwitchButton from './core/SwitchButton.vue'
+import { IconLayoutSidebarRightInactive, IconLayoutBottombarInactive } from '@tabler/icons-vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     position?: 'right' | 'bottom'
   }>(),
