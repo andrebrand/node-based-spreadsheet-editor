@@ -18,7 +18,6 @@
 
 <script setup lang="ts">
 import type { Icon } from '@tabler/icons-vue'
-import { ref, type Ref } from 'vue'
 
 
 type ButtonOption = {
