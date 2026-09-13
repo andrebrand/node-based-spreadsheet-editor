@@ -6,54 +6,59 @@
     @mousedown.capture="preventDragOnInteractive"
   >
     <div class="toolbar">
-      <div class="node-menu">
-        <button class="node-menu-toggle" type="button" :aria-expanded="openMenu === 'strings'" @click="toggleMenu('strings')">
-          <span> + Functions</span>
-          <span class="menu-chevron" :class="{ open: openMenu === 'strings' }" aria-hidden="true"></span>
-        </button>
-        <div v-if="openMenu === 'strings'" class="node-menu-items">
-          <button @click="addRegexNode(); closeMenu()">💫 RegEx Node</button>
-          <button @click="addStringNode(); closeMenu()">🆎 String Node</button>
-          <button @click="addCombineStringsNode(); closeMenu()">➕ Combine Strings Node</button>
-          <button @click="addCounterNode(); closeMenu()">💯 Counter Node</button>
-          <button @click="addCoalesceNode(); closeMenu()">🔀 Coalesce Node</button>
-          <button @click="addCompareNode(); closeMenu()">⚖ Compare Node</button>
-          <button @click="addIfNode(); closeMenu()">✅ If Node</button>
-          <button @click="addGroupNode(); closeMenu()">🔳 Group Node</button>
-        </div>
-      </div>
-      <div class="hidden">
-        <button class="node-menu-toggle array-menu-toggle" type="button" :aria-expanded="openMenu === 'arrays'" @click="toggleMenu('arrays')">
-          <span>Array Functions</span>
-          <span class="menu-chevron" :class="{ open: openMenu === 'arrays' }" aria-hidden="true"></span>
-        </button>
-        <div v-if="openMenu === 'arrays'" class="node-menu-items">
-          <button @click="addJoinNode(); closeMenu()">+ Join Node</button>
-          <button @click="addSplitNode(); closeMenu()">+ Split Node</button>
-        </div>
-      </div>
-      <!-- Preset Dropdown Menu: only shown if presets.length > 0 -->
-      <div v-if="presets.length > 0" class="node-menu preset-menu">
-        <button class="node-menu-toggle preset-menu-toggle" type="button" :aria-expanded="openMenu === 'presets'" @click="toggleMenu('presets')">
-          <span>📦 Presets ({{ presets.length }})</span>
-          <span class="menu-chevron" :class="{ open: openMenu === 'presets' }" aria-hidden="true"></span>
-        </button>
-        <div v-if="openMenu === 'presets'" class="node-menu-items preset-menu-items">
-          <div v-for="preset in presets" :key="preset.id" class="preset-menu-item">
-            <button class="preset-spawn-btn" type="button" @click="handleSpawnPreset(preset); closeMenu()">
-              <span>{{ preset.name }}</span>
-            </button>
-            <button
-              class="preset-delete-btn"
-              type="button"
-              title="Delete Preset"
-              @click.stop="deletePreset(preset.id)"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      </div>
+      <DropDownButton :options="{
+          icon: IconPlus,
+          label: 'Functions'
+        }"
+
+        v-model="isFunctionMenuOpen"
+
+        :items="[{
+          label: 'RegEx Node',
+          value: 'regex',
+          icon:  IconCodeAsterisk
+        },{
+          label: 'String Node',
+          value: 'string',
+          icon:  IconTextRecognition
+        },{
+          label: 'Combine String Node',
+          value: 'combine',
+          icon:  IconArrowMerge
+        },{
+          label: 'Counter Node',
+          value: 'counter',
+          icon:  IconNumber123
+        },{
+          label: 'Compare Node',
+          value: 'compare',
+          icon:  IconEqualNot
+        },{
+          label: 'Coalesce Node',
+          value: 'coalesce',
+          icon:  IconArrowMergeAltRight
+        },{
+          label: 'If Node',
+          value: 'if',
+          icon:  IconLogicAnd
+        },{
+          label: 'Group Node',
+          value: 'group',
+          icon:  IconBoxMargin
+        }]"
+        @itemClicked="addNode($event)"
+      />
+
+      <DropDownButton :options="{
+          icon: IconTournament,
+          label: 'Presets'
+        }"
+
+        v-model="isPresetsMenuOpen"
+
+        :items="presets.map(v => ({label: v.name, value: v.id}))"
+        @itemClicked="handleSpawnPreset($event)"
+      />
     </div>
     <VueFlow
       id="flow-editor"
@@ -69,7 +74,7 @@
       @node-drag-stop="onNodeDragStop"
       @node-double-click="onNodeDoubleClick"
       @edge-double-click="onEdgeDoubleClick"
-      @click="closeMenu()"
+      @click="closeMenus()"
       fit-view-on-init
     >
       <Background  />
@@ -107,11 +112,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
-import { markRaw } from 'vue'
-import { addEdge, ConnectionMode, useVueFlow, VueFlow } from '@vue-flow/core'
+import {ref, watch, nextTick, computed, type ComputedRef} from 'vue'
+import { addEdge, ConnectionMode, VueFlow } from '@vue-flow/core'
 import type { Connection, Edge, EdgeMouseEvent, NodeChange, NodeMouseEvent } from '@vue-flow/core'
-import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { nodes, edges } from '../composables/usePipeline'
@@ -124,58 +127,76 @@ import {
   confirmNamingDialog,
   type GroupPreset
 } from '../composables/usePresets'
-
-const editorContainerRef = ref<HTMLDivElement | null>(null)
-const presetNameInputRef = ref<HTMLInputElement | null>(null)
-const { project, dimensions, getViewport } = useVueFlow({ id: 'flow-editor' })
-
-watch(
-  () => namingDialog.value.isOpen,
-  (isOpen) => {
-    if (isOpen) {
-      nextTick(() => {
-        presetNameInputRef.value?.focus()
-        presetNameInputRef.value?.select()
-      })
-    }
-  }
-)
-
-function submitNamingDialog() {
-  confirmNamingDialog()
-}
-
-function handleSpawnPreset(preset: GroupPreset) {
-  const spawnPos = getSpawnPosition(preset.width, preset.height)
-  spawnPreset(preset, spawnPos)
-}
-
-import InputNode from './nodes/InputNode.vue'
-import OutputNode from './nodes/OutputNode.vue'
-import RegexNode from './nodes/RegexNode.vue'
-import StringNode from './nodes/StringNode.vue'
-import CombineStringsNode from './nodes/CombineStringsNode.vue'
-import JoinNode from './nodes/JoinNode.vue'
-import SplitNode from './nodes/SplitNode.vue'
-import CounterNode from './nodes/CounterNode.vue'
-import CoalesceNode from './nodes/CoalesceNode.vue'
-import CompareNode from './nodes/CompareNode.vue'
-import IfNode from './nodes/IfNode.vue'
-import GroupNode from './nodes/GroupNode.vue'
+import DropDownButton from "./core/DropDownButton.vue";
+import {
+  IconArrowMerge,
+  IconArrowMergeAltRight,
+  IconBoxMargin, IconCodeAsterisk,
+  IconEqualNot, IconNumber123,
+  IconPlus,
+  IconLogicAnd, IconTextRecognition, IconTournament
+} from "@tabler/icons-vue";
+import {nodeTypes, useAddNode} from "../composables/useAddNode.ts";
 
 const props = defineProps<{
   flowKey: number
   onInputDelete: () => void
 }>()
 
-const openMenu = ref<'strings' | 'arrays' | 'presets' | null>(null)
+const presetMap: ComputedRef<Map<string, GroupPreset>> = computed(() => {
+  return new Map((presets.value ?? []).map(v => [v.id, v]))
+})
 
-function toggleMenu(menu: 'strings' | 'arrays' | 'presets') {
-  openMenu.value = openMenu.value === menu ? null : menu
+
+const editorContainerRef = ref<HTMLDivElement | null>(null)
+const presetNameInputRef = ref<HTMLInputElement | null>(null)
+
+
+const {addNode, getSpawnPosition} = useAddNode(editorContainerRef);
+
+watch(
+    () => namingDialog.value.isOpen,
+    (isOpen) => {
+      if (isOpen) {
+        nextTick(() => {
+          presetNameInputRef.value?.focus()
+          presetNameInputRef.value?.select()
+        })
+      }
+    }
+)
+
+function submitNamingDialog() {
+  confirmNamingDialog()
 }
 
-function closeMenu() {
-  openMenu.value = null
+function handleSpawnPreset(presetId: string) {
+  if(!presetMap.value.has(presetId)){
+    return
+  }
+  const preset = presetMap.value.get(presetId)!;
+  const spawnPos = getSpawnPosition(preset.width, preset.height)
+  spawnPreset(preset, spawnPos)
+}
+
+const isFunctionMenuOpen = ref(false);
+const isPresetsMenuOpen = ref(false);
+
+watch(isFunctionMenuOpen, (isOpen) => {
+  if (isOpen){
+    isPresetsMenuOpen.value = false;
+  }
+});
+
+watch(isPresetsMenuOpen, (isOpen) => {
+  if (isOpen){
+    isFunctionMenuOpen.value = false;
+  }
+});
+
+const closeMenus = () => {
+  isPresetsMenuOpen.value = false;
+  isFunctionMenuOpen.value = false;
 }
 
 function preventDragOnInteractive(event: Event) {
@@ -185,21 +206,6 @@ function preventDragOnInteractive(event: Event) {
   if (interactive && !interactive.classList.contains('nodrag')) {
     interactive.classList.add('nodrag')
   }
-}
-
-const nodeTypes: NodeTypesObject = {
-  input: markRaw(InputNode),
-  output: markRaw(OutputNode),
-  regex: markRaw(RegexNode),
-  string: markRaw(StringNode),
-  combine: markRaw(CombineStringsNode),
-  join: markRaw(JoinNode),
-  split: markRaw(SplitNode),
-  counter: markRaw(CounterNode),
-  coalesce: markRaw(CoalesceNode),
-  compare: markRaw(CompareNode),
-  if: markRaw(IfNode),
-  group: markRaw(GroupNode)
 }
 
 function isValidConnection(connection: Connection) {
@@ -452,161 +458,5 @@ function onNodeDoubleClick(event: NodeMouseEvent) {
   } else {
     copyRegularNode(node)
   }
-}
-
-function getSpawnPosition(nodeWidth = 220, nodeHeight = 160) {
-  const vp = getViewport()
-  const width = dimensions.value.width || editorContainerRef.value?.clientWidth || 800
-  const height = dimensions.value.height || editorContainerRef.value?.clientHeight || 600
-
-  const centerScreen = {
-    x: width / 2,
-    y: height / 2
-  }
-
-  let centerFlow: { x: number; y: number }
-  try {
-    centerFlow = project(centerScreen)
-  } catch {
-    const zoom = vp.zoom || 1
-    centerFlow = {
-      x: (centerScreen.x - (vp.x || 0)) / zoom,
-      y: (centerScreen.y - (vp.y || 0)) / zoom
-    }
-  }
-
-  let x = Math.round(centerFlow.x - nodeWidth / 2)
-  let y = Math.round(centerFlow.y - nodeHeight / 2)
-
-  const existingPositions = new Set(
-    (nodes.value as Array<{ position: { x: number; y: number } }>).map(
-      (n) => `${n.position.x},${n.position.y}`
-    )
-  )
-  while (existingPositions.has(`${x},${y}`)) {
-    x += 20
-    y += 20
-  }
-
-  return { x, y }
-}
-
-function addRegexNode() {
-  const id = `regex_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'regex',
-    label: 'Regex',
-    position: getSpawnPosition(140, 140),
-    data: { pattern: '', replacement: '', mode: 'match', flags: '' }
-  })
-}
-
-function addStringNode() {
-  const id = `string_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'string',
-    label: 'String',
-    position: getSpawnPosition(180, 180),
-    data: { value: '' }
-  })
-}
-
-function addCombineStringsNode() {
-  const id = `combine_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'combine',
-    label: 'Combine Strings',
-    position: getSpawnPosition(220, 220),
-    data: {}
-  })
-}
-
-function addJoinNode() {
-  const id = `join_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'join',
-    label: 'Join',
-    position: getSpawnPosition(260, 260),
-    data: { inputCount: 2 }
-  })
-}
-
-function addSplitNode() {
-  const id = `split_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'split',
-    label: 'Split',
-    position: getSpawnPosition(260, 140),
-    data: { outputCount: 2 }
-  })
-}
-
-function addCounterNode() {
-  const id = `counter_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'counter',
-    label: 'Counter',
-    position: getSpawnPosition(220, 180),
-    data: { startMode: 'manual', startValue: 0, step: 1 }
-  })
-}
-
-function addCoalesceNode() {
-  const id = `coalesce_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'coalesce',
-    label: 'Coalesce',
-    position: getSpawnPosition(180, 160),
-    data: { inputCount: 2 }
-  })
-}
-
-function addCompareNode() {
-  const id = `compare_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'compare',
-    label: 'Compare',
-    position: getSpawnPosition(140, 200),
-    data: { operator: 'equals' }
-  })
-}
-
-function addIfNode() {
-  const id = `if_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'if',
-    label: 'If',
-    position: getSpawnPosition(120, 240),
-    data: {}
-  })
-}
-
-function addGroupNode() {
-  const id = `group_${Date.now()}`
-  nodes.value.push({
-    id,
-    type: 'group',
-    label: 'Group',
-    position: getSpawnPosition(420, 260),
-    width: 420,
-    height: 260,
-    style: {
-      width: '420px',
-      height: '260px'
-    },
-    data: {
-      width: 420,
-      height: 260
-    }
-  })
 }
 </script>
