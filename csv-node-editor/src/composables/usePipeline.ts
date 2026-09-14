@@ -66,6 +66,50 @@ export const outputTable = computed(() => {
       return startValues.map((startValue, index) => String(startValue + index * increment))
     }
 
+    // Unique Count Node: Zählt hoch, wenn die Kombination aller Inputs eindeutig und noch nicht vorgekommen ist
+    if (sourceNode.type === 'uniqueCountNode' || sourceNode.type === 'uniqueCount') {
+      const step = Number(sourceNode.data?.step ?? 1)
+      const increment = Number.isFinite(step) ? step : 1
+      const mode = sourceNode.data?.mode || 'id'
+
+      let startBase = Number(sourceNode.data?.startValue ?? 1)
+      if (!Number.isFinite(startBase)) startBase = 1
+
+      if (sourceNode.data?.startMode === 'input') {
+        const inputValues = getStreamForHandle(sourceNode.id, 'start')
+        const firstParsed = Number(inputValues[0])
+        startBase = Number.isFinite(firstParsed) ? firstParsed : 1
+      }
+
+      const inputCount = Math.max(1, Number(sourceNode.data?.inputCount || 1))
+      const inputStreams = Array.from({ length: inputCount }, (_, index) => (
+        getStreamForHandle(sourceNode.id, `input-${index}`)
+      ))
+
+      const seenMap = new Map<string, number>()
+      let uniqueIndex = 0
+      let lastAssigned = startBase
+
+      return rawData.value.rows.map((_, rowIndex) => {
+        const combo = inputStreams.map((stream) => String(stream[rowIndex] ?? ''))
+        const key = JSON.stringify(combo)
+
+        if (seenMap.has(key)) {
+          if (mode === 'running') {
+            return String(lastAssigned)
+          }
+          return String(seenMap.get(key))
+        }
+
+        const assignedValue = startBase + uniqueIndex * increment
+        seenMap.set(key, assignedValue)
+        lastAssigned = assignedValue
+        uniqueIndex += 1
+
+        return String(assignedValue)
+      })
+    }
+
     // Coalesce Node: Liefert pro Zeile den ersten nicht-leeren String-Wert
     if (sourceNode.type === 'coalesce') {
       const inputCount = sourceNode.data?.inputCount || 0

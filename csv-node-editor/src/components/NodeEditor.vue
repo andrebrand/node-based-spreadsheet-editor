@@ -16,6 +16,7 @@
           <button @click="addStringNode(); closeMenu()">🆎 String Node</button>
           <button @click="addCombineStringsNode(); closeMenu()">➕ Combine Strings Node</button>
           <button @click="addCounterNode(); closeMenu()">💯 Counter Node</button>
+          <button @click="addUniqueCountNode(); closeMenu()">🔢 Unique Count Node</button>
           <button @click="addCoalesceNode(); closeMenu()">🔀 Coalesce Node</button>
           <button @click="addCompareNode(); closeMenu()">⚖ Compare Node</button>
           <button @click="addIfNode(); closeMenu()">✅ If Node</button>
@@ -158,6 +159,7 @@ import CombineStringsNode from './nodes/CombineStringsNode.vue'
 import JoinNode from './nodes/JoinNode.vue'
 import SplitNode from './nodes/SplitNode.vue'
 import CounterNode from './nodes/CounterNode.vue'
+import UniqueCountNode from './nodes/UniqueCountNode.vue'
 import CoalesceNode from './nodes/CoalesceNode.vue'
 import CompareNode from './nodes/CompareNode.vue'
 import IfNode from './nodes/IfNode.vue'
@@ -196,6 +198,8 @@ const nodeTypes: NodeTypesObject = {
   join: markRaw(JoinNode),
   split: markRaw(SplitNode),
   counter: markRaw(CounterNode),
+  uniqueCountNode: markRaw(UniqueCountNode),
+  uniqueCount: markRaw(UniqueCountNode),
   coalesce: markRaw(CoalesceNode),
   compare: markRaw(CompareNode),
   if: markRaw(IfNode),
@@ -554,6 +558,23 @@ function addCounterNode() {
     label: 'Counter',
     position: getSpawnPosition(220, 180),
     data: { startMode: 'manual', startValue: 0, step: 1 }
+  })
+}
+
+function addUniqueCountNode() {
+  const id = `unique_count_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'uniqueCountNode',
+    label: 'Unique Count',
+    position: getSpawnPosition(220, 200),
+    data: {
+      startMode: 'manual',
+      startValue: 1,
+      step: 1,
+      inputCount: 1,
+      mode: 'id'
+    }
   })
 }
 
