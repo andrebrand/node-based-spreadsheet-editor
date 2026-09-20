@@ -4,12 +4,20 @@
     <div class="node-body">
       <div class="port-row left">
         <Handle id="leftString" type="target" :position="Position.Left" />
-        <span>String 1</span>
+        <PortLabel
+          :name="data.portNames?.['leftString']"
+          default-name="String 1"
+          @update:name="setPortName('leftString', $event)"
+        />
       </div>
 
       <div class="port-row left">
         <Handle id="rightString" type="target" :position="Position.Left" />
-        <span>String 2</span>
+        <PortLabel
+          :name="data.portNames?.['rightString']"
+          default-name="String 2"
+          @update:name="setPortName('rightString', $event)"
+        />
       </div>
 
       <div class="controls">
@@ -24,7 +32,11 @@
       </div>
 
       <div class="port-row right">
-        <span>true / false</span>
+        <PortLabel
+          :name="data.portNames?.['output']"
+          default-name="true / false"
+          @update:name="setPortName('output', $event)"
+        />
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
@@ -37,13 +49,20 @@
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import NodeTitle from './NodeTitle.vue'
+import PortLabel from './PortLabel.vue'
+import { setNodePortName } from '../../composables/usePortNames'
 
 const props = defineProps<NodeProps<{
   operator: 'equals' | 'not-equals' | 'contains' | 'starts-with' | 'ends-with'
   label?: string
+  portNames?: Record<string, string>
 }>>()
 
 const { removeNodes } = useVueFlow()
+
+function setPortName(portId: string, newName: string) {
+  setNodePortName(props.data, portId, newName)
+}
 
 function deleteNode() {
   removeNodes([props.id])

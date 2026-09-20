@@ -438,8 +438,8 @@ function onNodeDoubleClick(event: NodeMouseEvent) {
   const domEvent = event.event
   const target = domEvent?.target as HTMLElement | null
 
-  // Ignore double clicks on inputs, selects, buttons, title editing, handles, or resize controls
-  if (target && target.closest('input, select, textarea, button, a, .vue-flow__resize-control, .vue-flow__handle, .node-title-text')) {
+  // Ignore double clicks on inputs, selects, buttons, title editing, handles, port labels, or resize controls
+  if (target && target.closest('input, select, textarea, button, a, .vue-flow__resize-control, .vue-flow__handle, .node-title-text, .port-label, .port-label-text, .port-label-input, .output-column-name, .rename-column-input')) {
     return
   }
 

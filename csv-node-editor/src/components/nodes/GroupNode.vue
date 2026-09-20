@@ -18,21 +18,37 @@
 
     <div class="group-port outer-input">
       <Handle id="input" type="target" :position="Position.Left" />
-      <span>Input</span>
+      <PortLabel
+        :name="data.portNames?.['input']"
+        default-name="Input"
+        @update:name="setPortName('input', $event)"
+      />
     </div>
 
     <div class="group-port inner-input">
-      <span>|</span>
+      <PortLabel
+        :name="data.portNames?.['internal-input']"
+        default-name="|"
+        @update:name="setPortName('internal-input', $event)"
+      />
       <Handle id="internal-input" type="source" :position="Position.Right" />
     </div>
 
     <div class="group-port inner-output">
       <Handle id="internal-output" type="target" :position="Position.Left" />
-      <span>|</span>
+      <PortLabel
+        :name="data.portNames?.['internal-output']"
+        default-name="|"
+        @update:name="setPortName('internal-output', $event)"
+      />
     </div>
 
     <div class="group-port outer-output">
-      <span>Output</span>
+      <PortLabel
+        :name="data.portNames?.['output']"
+        default-name="Output"
+        @update:name="setPortName('output', $event)"
+      />
       <Handle id="output" type="source" :position="Position.Right" />
     </div>
 
@@ -47,12 +63,18 @@ import { NodeResizer } from '@vue-flow/node-resizer'
 import type { OnResize, OnResizeEnd } from '@vue-flow/node-resizer'
 import type { NodeProps } from '@vue-flow/core'
 import NodeTitle from './NodeTitle.vue'
+import PortLabel from './PortLabel.vue'
 import { nodes } from '../../composables/usePipeline'
 import { isDefaultGroupName, openNamingDialog, saveGroupAsPreset } from '../../composables/usePresets'
+import { setNodePortName } from '../../composables/usePortNames'
 
-const props = defineProps<NodeProps<{ label?: string; width?: number; height?: number }>>()
+const props = defineProps<NodeProps<{ label?: string; width?: number; height?: number; portNames?: Record<string, string> }>>()
 
 const { removeNodes, findNode } = useVueFlow()
+
+function setPortName(portId: string, newName: string) {
+  setNodePortName(props.data, portId, newName)
+}
 
 const saveStatus = ref<'idle' | 'saved'>('idle')
 

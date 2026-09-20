@@ -4,13 +4,21 @@
     <div class="node-body">
       <div v-for="index in data.inputCount" :key="index" class="port-row left">
         <Handle :id="`input-${index - 1}`" type="target" :position="Position.Left" />
-        <span>Input {{ index }}</span>
+        <PortLabel
+          :name="data.portNames?.[`input-${index - 1}`]"
+          :default-name="`Input ${index}`"
+          @update:name="setPortName(`input-${index - 1}`, $event)"
+        />
       </div>
 
       <button class="small-node-btn nodrag" type="button" @click="addInput">+ Input</button>
 
       <div class="port-row right">
-        <span>Array</span>
+        <PortLabel
+          :name="data.portNames?.['output']"
+          default-name="Array"
+          @update:name="setPortName('output', $event)"
+        />
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
@@ -23,13 +31,20 @@
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import NodeTitle from './NodeTitle.vue'
+import PortLabel from './PortLabel.vue'
+import { setNodePortName } from '../../composables/usePortNames'
 
 const props = defineProps<NodeProps<{
   inputCount: number
   label?: string
+  portNames?: Record<string, string>
 }>>()
 
 const { removeNodes } = useVueFlow()
+
+function setPortName(portId: string, newName: string) {
+  setNodePortName(props.data, portId, newName)
+}
 
 function addInput() {
   props.data.inputCount += 1

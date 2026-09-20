@@ -4,7 +4,11 @@
     <div class="node-body">
       <div class="port-row left">
         <Handle id="input" type="target" :position="Position.Left" />
-        <span>Input</span>
+        <PortLabel
+          :name="data.portNames?.['input']"
+          default-name="Input"
+          @update:name="setPortName('input', $event)"
+        />
       </div>
 
       <div class="controls">
@@ -45,7 +49,11 @@
       </div>
 
       <div class="port-row right">
-        <span>Output</span>
+        <PortLabel
+          :name="data.portNames?.['output']"
+          default-name="Output"
+          @update:name="setPortName('output', $event)"
+        />
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
@@ -59,6 +67,8 @@ import { computed } from 'vue'
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import NodeTitle from './NodeTitle.vue'
+import PortLabel from './PortLabel.vue'
+import { setNodePortName } from '../../composables/usePortNames'
 
 const props = defineProps<NodeProps<{
   pattern: string
@@ -66,9 +76,14 @@ const props = defineProps<NodeProps<{
   mode: 'match' | 'replace'
   flags?: string
   label?: string
+  portNames?: Record<string, string>
 }>>()
 
 const { removeNodes } = useVueFlow()
+
+function setPortName(portId: string, newName: string) {
+  setNodePortName(props.data, portId, newName)
+}
 
 const availableFlags = [
   { flag: 'i', title: 'Case Insensitive' }

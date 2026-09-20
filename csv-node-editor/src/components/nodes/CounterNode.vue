@@ -21,7 +21,11 @@
 
       <div v-if="data.startMode === 'input'" class="port-row left">
         <Handle id="start" type="target" :position="Position.Left" />
-        <span>Start value</span>
+        <PortLabel
+          :name="data.portNames?.['start']"
+          default-name="Start value"
+          @update:name="setPortName('start', $event)"
+        />
       </div>
 
       <div class="controls">
@@ -30,7 +34,11 @@
       </div>
 
       <div class="port-row right">
-        <span>Output</span>
+        <PortLabel
+          :name="data.portNames?.['output']"
+          default-name="Output"
+          @update:name="setPortName('output', $event)"
+        />
         <Handle id="output" type="source" :position="Position.Right" />
       </div>
 
@@ -45,15 +53,22 @@ import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import type { Edge, NodeProps } from '@vue-flow/core'
 import { edges } from '../../composables/usePipeline'
 import NodeTitle from './NodeTitle.vue'
+import PortLabel from './PortLabel.vue'
+import { setNodePortName } from '../../composables/usePortNames'
 
 const props = defineProps<NodeProps<{
   startMode: 'manual' | 'input'
   startValue: number
   step: number
   label?: string
+  portNames?: Record<string, string>
 }>>()
 
 const { removeNodes } = useVueFlow()
+
+function setPortName(portId: string, newName: string) {
+  setNodePortName(props.data, portId, newName)
+}
 
 watch(() => props.data.startMode, (mode) => {
   if (mode !== 'manual') return

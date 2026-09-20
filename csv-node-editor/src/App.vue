@@ -53,6 +53,7 @@ import TablePreview from './components/TablePreview.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { Edge, Node } from '@vue-flow/core'
 import { rawData, nodes, edges } from './composables/usePipeline'
+import { getNodePortName, isTargetHandle, normalizeTargetHandle } from './composables/usePortNames'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const planFileInput = ref<HTMLInputElement | null>(null)
@@ -287,53 +288,183 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
   const inputNode = nodeList.find((node) => node.id === 'node_input')
   const outputNode = nodeList.find((node) => node.id === 'node_output')
   const isNewGraph = !inputNode && !outputNode
-  const previousHeaders = rawData.value.headers
   const headerSet = new Set(headers)
   const validEdges: Edge[] = []
+  const connectedTargets = new Set<string>()
 
-  ;(edges.value as Edge[]).forEach((edge) => {
-    const sourceIsInput = edge.source === 'node_input'
+  // Partition existing edges so non-input-source edges are evaluated first.
+  // This ensures intermediate transform nodes connected to output columns take precedence over direct input passthrough.
+  const existingEdges = (edges.value as Edge[]) || []
+  const nonInputEdges = existingEdges.filter((e) => e.source !== 'node_input')
+  const inputEdges = existingEdges.filter((e) => e.source === 'node_input')
+
+  // 1. Process non-input edges (e.g. intermediate transform nodes -> output, or between transforms)
+  nonInputEdges.forEach((edge) => {
     const targetIsOutput = edge.target === 'node_output'
-    const sourceColumn = sourceIsInput ? edge.sourceHandle ?? '' : ''
-    const targetHandle = targetIsOutput ? edge.targetHandle ?? '' : ''
-    const targetColumn = targetHandle.startsWith('target-')
-      ? targetHandle.slice('target-'.length)
-      : ''
+    const targetNode = nodeList.find((n) => n.id === edge.target)
+    const sourceNode = nodeList.find((n) => n.id === edge.source)
+    if (!sourceNode || !targetNode) return
 
-    const sourceStillExists = !sourceIsInput || (previousHeaders.includes(sourceColumn) && headerSet.has(sourceColumn))
-    const targetStillExists = !targetIsOutput || (previousHeaders.includes(targetColumn) && headerSet.has(targetColumn))
+    const normTargetHandle = normalizeTargetHandle(targetNode.type, edge.targetHandle)
+    const targetKey = `${edge.target}-${normTargetHandle}`
 
-    if (sourceStillExists && targetStillExists) validEdges.push(edge)
+    if (targetIsOutput) {
+      const targetCol = (normTargetHandle || '').startsWith('target-')
+        ? (normTargetHandle || '').slice('target-'.length)
+        : ''
+
+      const targetStillExists = !outputNode?.data?.columns || outputNode.data.columns.includes(targetCol)
+      if (targetStillExists && !connectedTargets.has(targetKey)) {
+        validEdges.push({
+          ...edge,
+          targetHandle: normTargetHandle || edge.targetHandle
+        })
+        connectedTargets.add(targetKey)
+      }
+    } else {
+      if (!connectedTargets.has(targetKey)) {
+        validEdges.push({
+          ...edge,
+          targetHandle: normTargetHandle || edge.targetHandle
+        })
+        connectedTargets.add(targetKey)
+      }
+    }
   })
 
+  // 2. Process input-source edges
+  inputEdges.forEach((edge) => {
+    const targetNode = nodeList.find((n) => n.id === edge.target)
+    if (!targetNode) return
+
+    const normTargetHandle = normalizeTargetHandle(targetNode.type, edge.targetHandle)
+    const targetKey = `${edge.target}-${normTargetHandle}`
+
+    // If target handle already has an incoming edge, avoid duplicate connection
+    if (connectedTargets.has(targetKey)) {
+      return
+    }
+
+    const targetPortName = getNodePortName(targetNode, normTargetHandle, 'target')
+    const oldSourceHandle = edge.sourceHandle ?? ''
+    const oldSourcePortName = getNodePortName(inputNode, oldSourceHandle, 'source')
+
+    let matchedHeader: string | null = null
+    if (headerSet.has(targetPortName)) {
+      matchedHeader = targetPortName
+    } else if (headerSet.has(oldSourcePortName)) {
+      matchedHeader = oldSourcePortName
+    } else if (headerSet.has(oldSourceHandle)) {
+      matchedHeader = oldSourceHandle
+    }
+
+    if (matchedHeader) {
+      const edgeId = `edge-input-${matchedHeader}-${edge.target}-${normTargetHandle}`
+      validEdges.push({
+        ...edge,
+        id: edgeId,
+        sourceHandle: matchedHeader,
+        targetHandle: normTargetHandle || edge.targetHandle
+      })
+      connectedTargets.add(targetKey)
+    }
+  })
+
+  // 3. Auto-connect any explicitly named ports that match a column in the new file and don't have a connection yet
+  nodeList.forEach((node) => {
+    if (node.id === 'node_input' || node.id === 'node_output') return
+    if (node.data?.portNames) {
+      Object.entries(node.data.portNames).forEach(([handleId, customName]) => {
+        // Only target handles can be connected from input
+        if (!isTargetHandle(node.type, handleId)) return
+
+        const normHandleId = normalizeTargetHandle(node.type, handleId)
+        const nameStr = String(customName).trim()
+        if (headerSet.has(nameStr)) {
+          const targetKey = `${node.id}-${normHandleId}`
+          if (!connectedTargets.has(targetKey)) {
+            validEdges.push({
+              id: `edge-input-${nameStr}-${node.id}-${normHandleId}`,
+              source: 'node_input',
+              target: node.id,
+              sourceHandle: nameStr,
+              targetHandle: normHandleId
+            })
+            connectedTargets.add(targetKey)
+          }
+        }
+      })
+    }
+  })
+
+  // 4. Default edges for brand new graphs
   if (isNewGraph) {
     headers.forEach((header) => {
-      validEdges.push({
-        id: `edge-input-${header}-output-${header}`,
-        source: 'node_input',
-        target: 'node_output',
-        sourceHandle: header,
-        targetHandle: `target-${header}`
-      })
+      const targetHandle = `target-${header}`
+      const targetKey = `node_output-${targetHandle}`
+      if (!connectedTargets.has(targetKey)) {
+        validEdges.push({
+          id: `edge-input-${header}-output-${header}`,
+          source: 'node_input',
+          target: 'node_output',
+          sourceHandle: header,
+          targetHandle
+        })
+        connectedTargets.add(targetKey)
+      }
     })
   }
+
+  // 5. Strict deduplication pass to ensure single edge per target handle and signature
+  const seenTargets = new Set<string>()
+  const seenSignatures = new Set<string>()
+  const finalEdges: Edge[] = []
+
+  validEdges.forEach((edge) => {
+    const targetNode = nodeList.find((n) => n.id === edge.target)
+    const normTargetHandle = normalizeTargetHandle(targetNode?.type, edge.targetHandle)
+    const targetKey = `${edge.target}-${normTargetHandle}`
+    const sigKey = `${edge.source}-${edge.sourceHandle || ''}-${edge.target}-${normTargetHandle}`
+
+    if (seenTargets.has(targetKey) || seenSignatures.has(sigKey)) {
+      return
+    }
+    seenTargets.add(targetKey)
+    seenSignatures.add(sigKey)
+    finalEdges.push({
+      ...edge,
+      targetHandle: normTargetHandle || edge.targetHandle
+    })
+  })
+
+  const outputColumns = !isNewGraph && outputNode?.data?.columns && outputNode.data.columns.length > 0
+    ? [...outputNode.data.columns]
+    : [...headers]
 
   const nextNodes = nodeList.filter((node) => node.id !== 'node_input' && node.id !== 'node_output')
   nextNodes.unshift({
     id: 'node_input',
     type: 'input',
     position: inputNode?.position ?? { x: 50, y: 100 },
-    data: { fileName, headers, onDelete: resetApp }
+    data: {
+      fileName,
+      headers,
+      portNames: inputNode?.data?.portNames || {},
+      onDelete: resetApp
+    }
   })
   nextNodes.push({
     id: 'node_output',
     type: 'output',
     position: outputNode?.position ?? { x: 700, y: 100 },
-    data: { columns: [...headers] }
+    data: {
+      columns: outputColumns,
+      portNames: outputNode?.data?.portNames || {}
+    }
   })
 
   rawData.value = { fileName, headers, rows }
-  edges.value = validEdges
+  edges.value = finalEdges
   nodes.value = nextNodes
   flowKey.value += 1
 }
