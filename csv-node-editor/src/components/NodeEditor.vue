@@ -626,7 +626,13 @@ function addGroupNode() {
     },
     data: {
       width: 420,
-      height: 260
+      height: 260,
+      inputs: [
+        { id: 'input', internalId: 'internal-input', defaultName: 'Input' }
+      ],
+      outputs: [
+        { id: 'output', internalId: 'internal-output', defaultName: 'Output' }
+      ]
     }
   })
 }

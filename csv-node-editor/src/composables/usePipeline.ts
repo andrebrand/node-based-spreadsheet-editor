@@ -169,12 +169,38 @@ export const outputTable = computed(() => {
 
     // Group Node: Leitet Werte zwischen äusseren und inneren Ports weiter
     if (sourceNode.type === 'group') {
-      if (edge.sourceHandle === 'internal-input') return getStreamForHandle(sourceNode.id, 'input')
+      const sHandle = edge.sourceHandle || ''
+
+      // 1. Edge source is an internal-input (inner nodes consuming from group input)
+      if (sHandle === 'internal-input') {
+        return getStreamForHandle(sourceNode.id, 'input')
+      }
+      if (sHandle.startsWith('internal-input-')) {
+        const suffix = sHandle.slice('internal-input-'.length)
+        return getStreamForHandle(sourceNode.id, `input-${suffix}`)
+      }
+      const matchingInput = sourceNode.data?.inputs?.find?.((p: any) => p.internalId === sHandle)
+      if (matchingInput) {
+        return getStreamForHandle(sourceNode.id, matchingInput.id)
+      }
+
+      // 2. Edge source is an outer output (external nodes consuming group result)
+      const matchingOutput = sourceNode.data?.outputs?.find?.((p: any) => p.id === sHandle)
+      const targetInternalHandle = matchingOutput?.internalId || (
+        sHandle === 'output'
+          ? 'internal-output'
+          : (sHandle.startsWith('output-')
+              ? `internal-output-${sHandle.slice('output-'.length)}`
+              : 'internal-output')
+      )
+
       const internalOutputEdge = edgeList.find((candidate) => (
-        candidate.target === sourceNode.id && candidate.targetHandle === 'internal-output'
+        candidate.target === sourceNode.id && candidate.targetHandle === targetInternalHandle
       ))
-      if (internalOutputEdge) return getStreamForHandle(sourceNode.id, 'internal-output')
-      return getStreamForHandle(sourceNode.id, 'input')
+      if (internalOutputEdge) return getStreamForHandle(sourceNode.id, targetInternalHandle)
+
+      // No internal connection for this output — return empty values
+      return rawData.value.rows.map(() => '')
     }
 
     // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
