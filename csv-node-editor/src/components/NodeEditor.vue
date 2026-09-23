@@ -41,8 +41,16 @@
         </button>
         <div v-if="openMenu === 'presets'" class="node-menu-items preset-menu-items">
           <div v-for="preset in presets" :key="preset.id" class="preset-menu-item">
-            <button class="preset-spawn-btn" type="button" @click="handleSpawnPreset(preset); closeMenu()">
+            <button class="preset-spawn-btn" type="button" @click="handleSpawnMinifiedPreset(preset); closeMenu()">
               <span>{{ preset.name }}</span>
+            </button>
+            <button
+              class="preset-expand-btn"
+              type="button"
+              title="Spawn full preset"
+              @click.stop="handleSpawnPreset(preset); closeMenu()"
+            >
+              ↗
             </button>
             <button
               class="preset-delete-btn"
@@ -121,6 +129,7 @@ import {
   namingDialog,
   deletePreset,
   spawnPreset,
+  spawnMinifiedPreset,
   closeNamingDialog,
   confirmNamingDialog,
   type GroupPreset
@@ -151,6 +160,11 @@ function handleSpawnPreset(preset: GroupPreset) {
   spawnPreset(preset, spawnPos)
 }
 
+function handleSpawnMinifiedPreset(preset: GroupPreset) {
+  const spawnPos = getSpawnPosition(220, 180)
+  spawnMinifiedPreset(preset, spawnPos)
+}
+
 import InputNode from './nodes/InputNode.vue'
 import OutputNode from './nodes/OutputNode.vue'
 import RegexNode from './nodes/RegexNode.vue'
@@ -164,6 +178,7 @@ import CoalesceNode from './nodes/CoalesceNode.vue'
 import CompareNode from './nodes/CompareNode.vue'
 import IfNode from './nodes/IfNode.vue'
 import GroupNode from './nodes/GroupNode.vue'
+import PresetNode from './nodes/PresetNode.vue'
 
 const props = defineProps<{
   flowKey: number
@@ -203,7 +218,8 @@ const nodeTypes: NodeTypesObject = {
   coalesce: markRaw(CoalesceNode),
   compare: markRaw(CompareNode),
   if: markRaw(IfNode),
-  group: markRaw(GroupNode)
+  group: markRaw(GroupNode),
+  preset: markRaw(PresetNode)
 }
 
 function isValidConnection(connection: Connection) {

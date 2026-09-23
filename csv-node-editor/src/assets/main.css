@@ -429,3 +429,12 @@ tbody tr:hover { background-color: #f8fafc; }
   border-width: 4px;
   opacity: 0;
 }
+.preset-expand-btn {
+  border: 0;
+  background: transparent;
+  color: #059669;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.preset-expand-btn:hover { background: #d1fae5; }

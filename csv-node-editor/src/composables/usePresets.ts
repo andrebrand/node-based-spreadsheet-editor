@@ -32,6 +32,12 @@ export interface GroupPreset {
   edges: PresetEdge[]
 }
 
+export interface PresetPort {
+  id: string
+  internalId: string
+  defaultName: string
+}
+
 const STORAGE_KEY = 'csv_editor_group_presets'
 
 function loadFromStorage(): GroupPreset[] {
@@ -263,5 +269,25 @@ export function spawnPreset(preset: GroupPreset, spawnPosition: { x: number; y: 
   if (newEdges.length > 0) {
     ;(edges.value as any[]).push(...newEdges)
   }
+}
+
+export function spawnMinifiedPreset(preset: GroupPreset, spawnPosition: { x: number; y: number }) {
+  const nodeId = `preset_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+  const groupData = JSON.parse(JSON.stringify(preset.group.data || {}))
+  const inputs = Array.isArray(groupData.inputs) ? groupData.inputs : []
+  const outputs = Array.isArray(groupData.outputs) ? groupData.outputs : []
+
+  ;(nodes.value as any[]).push({
+    id: nodeId,
+    type: 'preset',
+    label: preset.name,
+    position: spawnPosition,
+    data: {
+      label: preset.name,
+      preset: JSON.parse(JSON.stringify(preset)),
+      inputs,
+      outputs
+    }
+  })
 }
 
