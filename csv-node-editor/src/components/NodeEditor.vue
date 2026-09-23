@@ -2,7 +2,6 @@
   <div
     ref="editorContainerRef"
     class="editor-container"
-    @pointerdown.capture="preventDragOnInteractive"
     @mousedown.capture="preventDragOnInteractive"
   >
     <div class="toolbar">
@@ -116,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { markRaw } from 'vue'
 import { addEdge, ConnectionMode, useVueFlow, VueFlow } from '@vue-flow/core'
 import type { Connection, Edge, EdgeMouseEvent, NodeChange, NodeMouseEvent } from '@vue-flow/core'
@@ -124,6 +123,7 @@ import type { NodeTypesObject } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { nodes, edges } from '../composables/usePipeline'
+import { getNodePortName } from '../composables/usePortNames'
 import {
   presets,
   namingDialog,
@@ -138,6 +138,16 @@ import {
 const editorContainerRef = ref<HTMLDivElement | null>(null)
 const presetNameInputRef = ref<HTMLInputElement | null>(null)
 const { project, dimensions, getViewport } = useVueFlow({ id: 'flow-editor' })
+
+onMounted(() => {
+  editorContainerRef.value?.addEventListener('pointerdown', handlePointerDown, true)
+  editorContainerRef.value?.addEventListener('click', handlePortClick, true)
+})
+
+onBeforeUnmount(() => {
+  editorContainerRef.value?.removeEventListener('pointerdown', handlePointerDown, true)
+  editorContainerRef.value?.removeEventListener('click', handlePortClick, true)
+})
 
 watch(
   () => namingDialog.value.isOpen,
@@ -202,6 +212,114 @@ function preventDragOnInteractive(event: Event) {
   if (interactive && !interactive.classList.contains('nodrag')) {
     interactive.classList.add('nodrag')
   }
+}
+
+interface AutoConnectPort {
+  nodeId: string
+  handleId: string
+  type: 'source' | 'target'
+}
+
+function getPortFromElement(element: Element): AutoConnectPort | null {
+  const nodeElement = element.closest<HTMLElement>('.vue-flow__node')
+  const handleElement = element.closest<HTMLElement>('.vue-flow__handle')
+  const nodeId = nodeElement?.getAttribute('data-id')
+  const handleId = handleElement?.getAttribute('data-handleid')
+  if (!nodeId || !handleId || !handleElement) return null
+
+  const type = handleElement.classList.contains('source') ? 'source' :
+    handleElement.classList.contains('target') ? 'target' : null
+  if (!type) return null
+
+  return { nodeId, handleId, type }
+}
+
+function portKey(port: AutoConnectPort) {
+  return `${port.nodeId}:${port.handleId}`
+}
+
+function isPortConnected(port: AutoConnectPort, edge: Edge) {
+  return port.type === 'source'
+    ? edge.source === port.nodeId && edge.sourceHandle === port.handleId
+    : edge.target === port.nodeId && edge.targetHandle === port.handleId
+}
+
+function autoConnectPort(port: AutoConnectPort) {
+  const nodeList = nodes.value as Array<{ id: string; data?: any }>
+  const clickedNode = nodeList.find((node) => node.id === port.nodeId)
+  if (!clickedNode) return
+
+  const oppositeType = port.type === 'source' ? 'target' : 'source'
+  const portName = getNodePortName(clickedNode, port.handleId, port.type)
+  const oppositePorts = [...document.querySelectorAll<HTMLElement>('.vue-flow__handle')]
+    .map((handle) => getPortFromElement(handle))
+    .filter((candidate): candidate is AutoConnectPort => (
+      !!candidate && candidate.type === oppositeType && candidate.nodeId !== port.nodeId
+    ))
+    .filter((candidate) => {
+      const candidateNode = nodeList.find((node) => node.id === candidate.nodeId)
+      return candidateNode && getNodePortName(candidateNode, candidate.handleId, candidate.type) === portName
+    })
+    .sort((left, right) => portKey(left).localeCompare(portKey(right)))
+
+  const edgeList = edges.value as Edge[]
+  const connectedEdges = edgeList
+    .filter((edge) => isPortConnected(port, edge))
+    .sort((left, right) => {
+      const leftPort = port.type === 'source'
+        ? { nodeId: left.target, handleId: left.targetHandle || '' }
+        : { nodeId: left.source, handleId: left.sourceHandle || '' }
+      const rightPort = port.type === 'source'
+        ? { nodeId: right.target, handleId: right.targetHandle || '' }
+        : { nodeId: right.source, handleId: right.sourceHandle || '' }
+      return `${leftPort.nodeId}:${leftPort.handleId}`.localeCompare(`${rightPort.nodeId}:${rightPort.handleId}`)
+    })
+
+  const currentEdge = connectedEdges[0]
+  const currentPort: AutoConnectPort | null = currentEdge
+    ? port.type === 'source'
+      ? { nodeId: currentEdge.target, handleId: currentEdge.targetHandle || '', type: oppositeType }
+      : { nodeId: currentEdge.source, handleId: currentEdge.sourceHandle || '', type: oppositeType }
+    : null
+  const remainingEdges = currentEdge ? edgeList.filter((edge) => edge.id !== currentEdge.id) : edgeList
+  edges.value = remainingEdges
+
+  const availablePorts = oppositePorts.filter((candidate) => (
+    !remainingEdges.some((edge) => isPortConnected(candidate, edge))
+  ))
+  if (availablePorts.length === 0) return
+
+  let nextPort = availablePorts[0]
+  if (currentPort && availablePorts.length > 1) {
+    const currentIndex = availablePorts.findIndex((candidate) => portKey(candidate) === portKey(currentPort))
+    nextPort = availablePorts[(currentIndex + 1 + availablePorts.length) % availablePorts.length]
+  } else if (currentPort && availablePorts.length === 1 && portKey(availablePorts[0]) === portKey(currentPort)) {
+    return
+  }
+
+  const connection: Connection = port.type === 'source'
+    ? { source: port.nodeId, sourceHandle: port.handleId, target: nextPort.nodeId, targetHandle: nextPort.handleId }
+    : { source: nextPort.nodeId, sourceHandle: nextPort.handleId, target: port.nodeId, targetHandle: port.handleId }
+  onConnect(connection)
+}
+
+function handlePointerDown(event: PointerEvent) {
+  const port = event.ctrlKey ? getPortFromElement(event.target as Element) : null
+  if (port) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+  preventDragOnInteractive(event)
+}
+
+function handlePortClick(event: MouseEvent) {
+  if (!event.ctrlKey) return
+  const port = getPortFromElement(event.target as Element)
+  if (!port) return
+  event.preventDefault()
+  event.stopPropagation()
+  autoConnectPort(port)
 }
 
 const nodeTypes: NodeTypesObject = {
