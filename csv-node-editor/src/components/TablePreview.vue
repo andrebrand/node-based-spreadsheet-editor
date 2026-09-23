@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import * as XLSX from 'xlsx'
-import { outputTable } from '../composables/usePipeline'
+import { outputTable, rawData } from '../composables/usePipeline'
 import SwitchButton from './core/SwitchButton.vue'
 import { IconLayoutSidebarRightInactive, IconLayoutBottombarInactive } from '@tabler/icons-vue'
 
@@ -69,6 +69,10 @@ function escapeCsvValue(value: unknown) {
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
 }
 
+function getExportBaseName() {
+  return rawData.value.fileName.replace(/\.[^.]+$/, '') || 'output'
+}
+
 function downloadCsv() {
   const headerRow = outputTable.value.headers.map(escapeCsvValue).join(',')
   const dataRows = outputTable.value.rows.map((row) => (
@@ -79,7 +83,7 @@ function downloadCsv() {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = 'output.csv'
+  link.download = `${getExportBaseName()}.csv`
   link.click()
   URL.revokeObjectURL(url)
 }
@@ -102,7 +106,7 @@ function downloadExcel() {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = 'output.xlsx'
+  link.download = `${getExportBaseName()}.xlsx`
   link.click()
   URL.revokeObjectURL(url)
 }

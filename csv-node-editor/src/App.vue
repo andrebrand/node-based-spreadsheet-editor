@@ -50,7 +50,7 @@
 import * as XLSX from 'xlsx'
 import NodeEditor from './components/NodeEditor.vue'
 import TablePreview from './components/TablePreview.vue'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import type { Edge, Node } from '@vue-flow/core'
 import { rawData, nodes, edges } from './composables/usePipeline'
 import { getNodePortName, isTargetHandle, normalizeTargetHandle } from './composables/usePortNames'
@@ -73,6 +73,14 @@ const savedHeight = typeof window !== 'undefined' ? localStorage.getItem('csv_ed
 const previewWidth = ref<number>(savedWidth ? Math.max(240, parseFloat(savedWidth)) : defaultPreviewWidth)
 const previewHeight = ref<number>(savedHeight ? Math.max(140, parseFloat(savedHeight)) : defaultPreviewHeight)
 const isResizing = ref(false)
+
+watch(
+  () => rawData.value.fileName,
+  (fileName) => {
+    document.title = fileName ? `csv-node-editor - ${fileName}` : 'csv-node-editor'
+  },
+  { immediate: true }
+)
 
 const previewPaneStyle = computed(() => {
   if (previewPosition.value === 'bottom') {
