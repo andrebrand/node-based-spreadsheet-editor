@@ -12,7 +12,8 @@ test('spawns compact presets and expands the same preset into a group', async ({
       label: 'Extract digits',
       data: {
         inputs: [{ id: 'input', internalId: 'internal-input', defaultName: 'Input' }],
-        outputs: [{ id: 'output', internalId: 'internal-output', defaultName: 'Output' }]
+        outputs: [{ id: 'output', internalId: 'internal-output', defaultName: 'Output' }],
+        portNames: { input: 'Source value', output: 'Extracted value' }
       }
     },
     childNodes: [
@@ -58,6 +59,8 @@ test('spawns compact presets and expands the same preset into a group', async ({
 
   const compactNode = page.locator('.preset-node')
   await expect(compactNode).toBeVisible()
+  await expect(compactNode.locator('.port-row.left .port-label-text')).toHaveText('Source value')
+  await expect(compactNode.locator('.port-row.right .port-label-text')).toHaveText('Extracted value')
   await expect(compactNode.locator('.vue-flow__handle-input')).toBeVisible()
   await expect(compactNode.locator('.vue-flow__handle-output')).toBeVisible()
 

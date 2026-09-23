@@ -286,7 +286,8 @@ export function spawnMinifiedPreset(preset: GroupPreset, spawnPosition: { x: num
       label: preset.name,
       preset: JSON.parse(JSON.stringify(preset)),
       inputs,
-      outputs
+      outputs,
+      portNames: groupData.portNames || {}
     }
   })
 }
