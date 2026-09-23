@@ -118,6 +118,9 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .custom-node { background: white; border: 1px solid #cbd5e1; border-radius: 6px; width: 220px; font-size: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 .vue-flow__node-group { z-index: -1; }
 .node-header { background: #f8fafc; padding: 8px; border-bottom: 1px solid #cbd5e1; font-weight: bold; border-radius: 6px 6px 0 0; }
+.output-node-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.output-pin-btn { border: 1px solid #cbd5e1; border-radius: 3px; padding: 3px 6px; background: white; color: #334155; cursor: pointer; font-size: 10px; }
+.output-pin-btn:hover { background: #e2e8f0; }
 .node-title-text { cursor: text; }
 .node-title-input { width: 100%; padding: 2px 4px; border: 1px solid #93c5fd; border-radius: 3px; font-size: 12px; font-weight: bold; }
 .node-body { padding: 10px; }

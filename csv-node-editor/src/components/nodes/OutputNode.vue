@@ -1,6 +1,16 @@
 <template>
   <div class="custom-node output-node">
-    <div class="node-header">📤 Output Schema</div>
+    <div class="node-header output-node-header">
+      <span>📤 Output Schema</span>
+      <button
+        class="output-pin-btn nodrag"
+        type="button"
+        :title="data.pinned ? 'Unpin output schema' : 'Pin output schema'"
+        @click.stop="togglePinned"
+      >
+        {{ data.pinned ? '📌 Pinned' : '📍 Pin' }}
+      </button>
+    </div>
     <div class="node-body">
       <div class="add-column">
         <input 
@@ -52,6 +62,7 @@ import { edges } from '../../composables/usePipeline'
 
 const props = defineProps<NodeProps<{
   columns: string[]
+  pinned?: boolean
 }>>()
 
 const newCol = ref('')
@@ -60,6 +71,10 @@ const dragOverColumn = ref<string | null>(null)
 const editingColumn = ref<string | null>(null)
 const editedColumn = ref('')
 const { updateNodeInternals } = useVueFlow()
+
+function togglePinned() {
+  props.data.pinned = !props.data.pinned
+}
 
 function refreshConnections() {
   nextTick(() => updateNodeInternals([props.id]))

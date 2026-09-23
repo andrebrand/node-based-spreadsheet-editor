@@ -288,6 +288,9 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
   const inputNode = nodeList.find((node) => node.id === 'node_input')
   const outputNode = nodeList.find((node) => node.id === 'node_output')
   const isNewGraph = !inputNode && !outputNode
+  const outputColumns = !isNewGraph && outputNode?.data?.pinned && outputNode.data.columns?.length > 0
+    ? [...outputNode.data.columns]
+    : [...headers]
   const headerSet = new Set(headers)
   const validEdges: Edge[] = []
   const connectedTargets = new Set<string>()
@@ -313,7 +316,7 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
         ? (normTargetHandle || '').slice('target-'.length)
         : ''
 
-      const targetStillExists = !outputNode?.data?.columns || outputNode.data.columns.includes(targetCol)
+      const targetStillExists = outputColumns.includes(targetCol)
       if (targetStillExists && !connectedTargets.has(targetKey)) {
         validEdges.push({
           ...edge,
@@ -360,13 +363,16 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
 
     if (matchedHeader) {
       const edgeId = `edge-input-${matchedHeader}-${edge.target}-${normTargetHandle}`
+      const nextTargetHandle = edge.target === 'node_output' && !outputNode?.data?.pinned
+        ? `target-${matchedHeader}`
+        : normTargetHandle || edge.targetHandle
       validEdges.push({
         ...edge,
         id: edgeId,
         sourceHandle: matchedHeader,
-        targetHandle: normTargetHandle || edge.targetHandle
+        targetHandle: nextTargetHandle
       })
-      connectedTargets.add(targetKey)
+      connectedTargets.add(`${edge.target}-${nextTargetHandle}`)
     }
   })
 
@@ -437,10 +443,6 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
     })
   })
 
-  const outputColumns = !isNewGraph && outputNode?.data?.columns && outputNode.data.columns.length > 0
-    ? [...outputNode.data.columns]
-    : [...headers]
-
   const nextNodes = nodeList.filter((node) => node.id !== 'node_input' && node.id !== 'node_output')
   nextNodes.unshift({
     id: 'node_input',
@@ -459,7 +461,8 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
     position: outputNode?.position ?? { x: 700, y: 100 },
     data: {
       columns: outputColumns,
-      portNames: outputNode?.data?.portNames || {}
+      portNames: outputNode?.data?.portNames || {},
+      pinned: outputNode?.data?.pinned === true
     }
   })
 
