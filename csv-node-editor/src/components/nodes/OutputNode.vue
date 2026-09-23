@@ -28,8 +28,6 @@
         :key="col"
         class="port-row left output-column-row nodrag"
         :class="{ 'drag-over': dragOverColumn === col }"
-        draggable="true"
-        @dragstart.stop="startColumnDrag(col)"
         @dragend="finishColumnDrag"
         @dragover.prevent.stop="previewColumnDrop(col)"
         @drop.prevent.stop="dropColumn(col)"
@@ -45,7 +43,13 @@
           @keydown.escape.prevent="cancelRename"
           @blur="finishRename(col)"
         />
-        <span v-else class="output-column-name nodrag" @dblclick.stop="startRename(col)">
+        <span
+          v-else
+          class="output-column-name nodrag"
+          draggable="true"
+          @dragstart.stop="startColumnDrag(col, $event)"
+          @dblclick.stop="startRename(col)"
+        >
           {{ col }}
         </span>
         <button class="remove-btn nodrag" @click="removeColumn(col)">×</button>
@@ -80,7 +84,12 @@ function refreshConnections() {
   nextTick(() => updateNodeInternals([props.id]))
 }
 
-function startColumnDrag(col: string) {
+function startColumnDrag(col: string, event: DragEvent) {
+  if (event.target instanceof Element && event.target.closest('.vue-flow__handle')) {
+    event.preventDefault()
+    draggedColumn.value = null
+    return
+  }
   draggedColumn.value = col
 }
 

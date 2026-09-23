@@ -137,7 +137,7 @@ import {
 
 const editorContainerRef = ref<HTMLDivElement | null>(null)
 const presetNameInputRef = ref<HTMLInputElement | null>(null)
-const { project, dimensions, getViewport } = useVueFlow({ id: 'flow-editor' })
+const { project, dimensions, getViewport, removeNodes } = useVueFlow({ id: 'flow-editor' })
 
 onMounted(() => {
   editorContainerRef.value?.addEventListener('pointerdown', handlePointerDown, true)
@@ -392,6 +392,7 @@ function onNodesChange(changes: NodeChange[]) {
   const nodeList = nodes.value as Array<{ id: string }>
   const inputStillExists = nodeList.some((node) => node.id === 'node_input')
   if (!inputStillExists && changes.some((change) => change.type === 'remove' && change.id === 'node_input')) {
+    removeNodes(['node_output'])
     props.onInputDelete()
   }
 }

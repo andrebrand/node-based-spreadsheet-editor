@@ -50,7 +50,7 @@
 import * as XLSX from 'xlsx'
 import NodeEditor from './components/NodeEditor.vue'
 import TablePreview from './components/TablePreview.vue'
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import type { Edge, Node } from '@vue-flow/core'
 import { rawData, nodes, edges } from './composables/usePipeline'
 import { getNodePortName, isTargetHandle, normalizeTargetHandle } from './composables/usePortNames'
@@ -80,6 +80,13 @@ watch(
     document.title = fileName ? `csv-node-editor - ${fileName}` : 'csv-node-editor'
   },
   { immediate: true }
+)
+
+watch(
+  () => nodes.value.some((node) => node.id === 'node_input'),
+  (hasInput, hadInput) => {
+    if (hadInput && !hasInput) resetApp()
+  }
 )
 
 const previewPaneStyle = computed(() => {
@@ -213,8 +220,14 @@ function resetApp() {
     headers: [],
     rows: []
   }
-  edges.value = []
-  nodes.value = []
+  nextTick(() => {
+    const removedNodeIds = new Set(['node_input', 'node_output'])
+    nodes.value = nodes.value.filter((node) => !removedNodeIds.has(node.id))
+    edges.value = edges.value.filter((edge) => (
+      !removedNodeIds.has(edge.source) && !removedNodeIds.has(edge.target)
+    ))
+    flowKey.value += 1
+  })
   if (fileInput.value) fileInput.value.value = ''
   if (planFileInput.value) planFileInput.value.value = ''
 }
