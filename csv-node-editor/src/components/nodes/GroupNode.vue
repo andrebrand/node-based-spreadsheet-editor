@@ -278,7 +278,21 @@ function handleSavePreset() {
 }
 
 function deleteNode() {
-  removeNodes([props.id])
+  const nodeList = nodes.value as Array<{ id: string; parentNode?: string }>
+  const idsToDelete = new Set([props.id])
+  let foundDescendant = true
+
+  while (foundDescendant) {
+    foundDescendant = false
+    nodeList.forEach((node) => {
+      if (node.parentNode && idsToDelete.has(node.parentNode) && !idsToDelete.has(node.id)) {
+        idsToDelete.add(node.id)
+        foundDescendant = true
+      }
+    })
+  }
+
+  removeNodes([...idsToDelete])
 }
 
 function onResize(event: OnResize | OnResizeEnd) {

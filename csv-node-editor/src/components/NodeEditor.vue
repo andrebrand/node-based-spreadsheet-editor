@@ -281,14 +281,6 @@ function onNodesChange(changes: NodeChange[]) {
 function onNodeDragStop({ node }: { node: { id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; parentNode?: string; position: { x: number; y: number } } }) {
   if (node.type === 'group') return
 
-  if (node.type === 'preset') {
-    node.parentNode = undefined
-    if (node.computedPosition) {
-      node.position = { ...node.computedPosition }
-    }
-    return
-  }
-
   const nodeList = nodes.value as Array<{ id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; position: { x: number; y: number }; parentNode?: string; data?: any; width?: number; height?: number }>
   const groups = nodeList.filter((candidate) => candidate.type === 'group')
   const matchingGroup = groups.find((candidate) => {
