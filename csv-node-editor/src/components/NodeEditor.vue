@@ -278,6 +278,32 @@ function onNodesChange(changes: NodeChange[]) {
   }
 }
 
+function updateGroupZIndices() {
+  const nodeList = nodes.value as Array<{ id: string; type?: string; parentNode?: string; style?: Record<string, string | number> }>
+  const groupDepth = new Map<string, number>()
+
+  function getGroupDepth(groupId: string): number {
+    const cachedDepth = groupDepth.get(groupId)
+    if (cachedDepth !== undefined) return cachedDepth
+
+    const group = nodeList.find((candidate) => candidate.id === groupId)
+    if (!group?.parentNode) {
+      groupDepth.set(groupId, 0)
+      return 0
+    }
+
+    const depth = getGroupDepth(group.parentNode) + 1
+    groupDepth.set(groupId, depth)
+    return depth
+  }
+
+  nodeList.forEach((node) => {
+    if (node.type !== 'group') return
+    const depth = getGroupDepth(node.id)
+    node.style = { ...(node.style || {}), zIndex: -1000 + depth }
+  })
+}
+
 function onNodeDragStop({ node }: { node: { id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; parentNode?: string; position: { x: number; y: number } } }) {
   const nodeList = nodes.value as Array<{ id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; position: { x: number; y: number }; parentNode?: string; data?: any; width?: number; height?: number }>
   const groups = nodeList.filter((candidate) => {
@@ -313,6 +339,8 @@ function onNodeDragStop({ node }: { node: { id: string; type?: string; computedP
     node.parentNode = undefined
     node.position = { x: node.computedPosition.x, y: node.computedPosition.y }
   }
+
+  updateGroupZIndices()
 }
 
 function copyRegularNode(node: any) {
@@ -640,11 +668,13 @@ function addGroupNode() {
   nodes.value.push({
     id,
     type: 'group',
+    zIndex: -1,
     label: 'Group',
     position: getSpawnPosition(420, 260),
     width: 420,
     height: 260,
     style: {
+      zIndex: -1,
       width: '420px',
       height: '260px'
     },

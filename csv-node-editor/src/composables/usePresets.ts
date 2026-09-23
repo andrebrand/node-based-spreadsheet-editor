@@ -223,11 +223,13 @@ export function spawnPreset(preset: GroupPreset, spawnPosition: { x: number; y: 
   const newGroupNode = {
     id: newGroupId,
     type: 'group',
+    zIndex: -1,
     label: preset.group.label || preset.name || 'Group',
     position: spawnPosition,
     width: preset.width,
     height: preset.height,
     style: {
+      zIndex: -1,
       width: `${preset.width}px`,
       height: `${preset.height}px`
     },
