@@ -279,10 +279,18 @@ function onNodesChange(changes: NodeChange[]) {
 }
 
 function onNodeDragStop({ node }: { node: { id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; parentNode?: string; position: { x: number; y: number } } }) {
-  if (node.type === 'group') return
-
   const nodeList = nodes.value as Array<{ id: string; type?: string; computedPosition?: { x: number; y: number }; dimensions?: { width: number; height: number }; position: { x: number; y: number }; parentNode?: string; data?: any; width?: number; height?: number }>
-  const groups = nodeList.filter((candidate) => candidate.type === 'group')
+  const groups = nodeList.filter((candidate) => {
+    if (candidate.type !== 'group' || candidate.id === node.id) return false
+
+    let ancestorId = candidate.parentNode
+    while (ancestorId) {
+      if (ancestorId === node.id) return false
+      ancestorId = nodeList.find((ancestor) => ancestor.id === ancestorId)?.parentNode
+    }
+
+    return true
+  })
   const matchingGroup = groups.find((candidate) => {
     const groupWidth = candidate.data?.width || candidate.width || candidate.dimensions?.width
     const groupHeight = candidate.data?.height || candidate.height || candidate.dimensions?.height
