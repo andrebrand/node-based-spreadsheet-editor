@@ -236,6 +236,11 @@ function getPortFromElement(element: Element): AutoConnectPort | null {
   return { nodeId, handleId, type }
 }
 
+function usesAutoConnectModifier(event: MouseEvent | PointerEvent) {
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+  return isMac ? event.metaKey : event.ctrlKey
+}
+
 function portKey(port: AutoConnectPort) {
   return `${port.nodeId}:${port.handleId}`
 }
@@ -306,7 +311,7 @@ function autoConnectPort(port: AutoConnectPort) {
 }
 
 function handlePointerDown(event: PointerEvent) {
-  const port = event.ctrlKey ? getPortFromElement(event.target as Element) : null
+  const port = usesAutoConnectModifier(event) ? getPortFromElement(event.target as Element) : null
   if (port) {
     event.preventDefault()
     event.stopPropagation()
@@ -316,7 +321,7 @@ function handlePointerDown(event: PointerEvent) {
 }
 
 function handlePortClick(event: MouseEvent) {
-  if (!event.ctrlKey) return
+  if (!usesAutoConnectModifier(event)) return
   const port = getPortFromElement(event.target as Element)
   if (!port) return
   event.preventDefault()
