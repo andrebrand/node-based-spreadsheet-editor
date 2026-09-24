@@ -97,6 +97,15 @@ export function getNodePortName(node: any, handleId?: string | null, _side?: 'so
     }
   }
 
+  if (node.type === 'splitString') {
+    if (handleId === 'input') return 'Input'
+    if (handleId === 'separator') return 'Separator'
+    if (handleId.startsWith('output-')) {
+      const idx = parseInt(handleId.slice('output-'.length), 10)
+      return `Output ${isNaN(idx) ? 1 : idx + 1}`
+    }
+  }
+
   // 11. Regex node
   if (node.type === 'regex') {
     if (handleId === 'input') return 'Input'
@@ -157,6 +166,7 @@ export function isTargetHandle(nodeType: string | undefined, handleId: string): 
   if (nodeType === 'if') return handleId === 'condition' || handleId === 'then' || handleId === 'else'
   if (nodeType === 'join') return handleId.startsWith('input-')
   if (nodeType === 'split') return handleId === 'input'
+  if (nodeType === 'splitString') return handleId === 'input' || handleId === 'separator'
   if (nodeType === 'group') return handleId === 'input' || handleId === 'internal-output'
   if (nodeType === 'group') return handleId === 'input' || handleId.startsWith('input-') || handleId === 'internal-output' || handleId.startsWith('internal-output-')
   return !handleId.includes('output')
@@ -164,7 +174,7 @@ export function isTargetHandle(nodeType: string | undefined, handleId: string): 
 
 export function normalizeTargetHandle(nodeType: string | undefined, handleId?: string | null): string {
   if (handleId) return handleId
-  if (nodeType === 'regex' || nodeType === 'split') return 'input'
+  if (nodeType === 'regex' || nodeType === 'split' || nodeType === 'splitString') return 'input'
   if (nodeType === 'group') return 'input'
   return ''
 }

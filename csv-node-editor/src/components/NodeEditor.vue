@@ -14,6 +14,7 @@
           <button @click="addRegexNode(); closeMenu()">💫 RegEx Node</button>
           <button @click="addStringNode(); closeMenu()">🆎 String Node</button>
           <button @click="addCombineStringsNode(); closeMenu()">➕ Combine Strings Node</button>
+          <button @click="addSplitStringNode(); closeMenu()">✂ Split String Node</button>
           <button @click="addCounterNode(); closeMenu()">💯 Counter Node</button>
           <button @click="addUniqueCountNode(); closeMenu()">🔢 Unique Count Node</button>
           <button @click="addCoalesceNode(); closeMenu()">🔀 Coalesce Node</button>
@@ -180,6 +181,7 @@ import OutputNode from './nodes/OutputNode.vue'
 import RegexNode from './nodes/RegexNode.vue'
 import StringNode from './nodes/StringNode.vue'
 import CombineStringsNode from './nodes/CombineStringsNode.vue'
+import SplitStringNode from './nodes/SplitStringNode.vue'
 import JoinNode from './nodes/JoinNode.vue'
 import SplitNode from './nodes/SplitNode.vue'
 import CounterNode from './nodes/CounterNode.vue'
@@ -328,6 +330,7 @@ const nodeTypes: NodeTypesObject = {
   regex: markRaw(RegexNode),
   string: markRaw(StringNode),
   combine: markRaw(CombineStringsNode),
+  splitString: markRaw(SplitStringNode),
   join: markRaw(JoinNode),
   split: markRaw(SplitNode),
   counter: markRaw(CounterNode),
@@ -696,6 +699,17 @@ function addCombineStringsNode() {
     label: 'Combine Strings',
     position: getSpawnPosition(220, 220),
     data: {}
+  })
+}
+
+function addSplitStringNode() {
+  const id = `split_string_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'splitString',
+    label: 'Split String',
+    position: getSpawnPosition(220, 220),
+    data: { outputCount: 2 }
   })
 }
 

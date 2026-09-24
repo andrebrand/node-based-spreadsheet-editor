@@ -424,9 +424,9 @@ function updateFileGraph(fileName: string, headers: string[], rows: any[]) {
     }
   })
 
-  // 4. Default edges for brand new graphs
-  if (isNewGraph) {
-    headers.forEach((header) => {
+  // 4. Keep the input and output nodes connected by each current output column.
+  if (isNewGraph || !outputNode?.data?.pinned) {
+    outputColumns.forEach((header) => {
       const targetHandle = `target-${header}`
       const targetKey = `node_output-${targetHandle}`
       if (!connectedTargets.has(targetKey)) {

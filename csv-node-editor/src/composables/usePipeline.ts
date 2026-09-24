@@ -269,6 +269,19 @@ export const outputTable = computed(() => {
       })
     }
 
+    // Split String Node: splits one string stream into one stream per output port.
+    if (sourceNode.type === 'splitString') {
+      const inputStream = getStreamForHandle(sourceNode.id, 'input', context)
+      const separatorStream = getStreamForHandle(sourceNode.id, 'separator', context)
+      const outputIndex = Number((edge.sourceHandle ?? '').replace('output-', ''))
+
+      return inputStream.map((value, rowIndex) => {
+        const separator = String(separatorStream[rowIndex] ?? '')
+        const parts = separator ? String(value ?? '').split(separator) : [String(value ?? '')]
+        return parts[outputIndex] ?? ''
+      })
+    }
+
     // 2. Regex Node: Transformiert die Eingabe
     if (sourceNode.type === 'regex') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input', context)

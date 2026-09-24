@@ -33,6 +33,14 @@ test.describe('Output schema file updates', () => {
     await expect(outputNode.locator('.output-column-name')).toHaveCount(4)
     await expect(outputNode).toContainText('Kat')
     await expect(outputNode).not.toContainText('Kategorie')
+
+    const directEdges = await page.evaluate(() => {
+      return (window as any).__PIPELINE__.edges.value
+        .filter((edge: any) => edge.source === 'node_input' && edge.target === 'node_output')
+        .map((edge: any) => `${edge.sourceHandle}:${edge.targetHandle}`)
+        .sort()
+    })
+    expect(directEdges).toEqual(['Hersteller:target-Hersteller', 'Kat:target-Kat', 'Laenge:target-Laenge', 'Name:target-Name'])
   })
 
   test('keeps the output schema when it is pinned', async ({ page }) => {
