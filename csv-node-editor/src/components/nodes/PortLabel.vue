@@ -16,7 +16,7 @@
     <span
       v-else
       class="port-label-text nodrag"
-      title="Doppelklick zum Umbenennen"
+      title="Double-click to rename"
     >
       {{ name || defaultName }}
     </span>

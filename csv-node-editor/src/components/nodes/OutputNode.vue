@@ -16,7 +16,7 @@
         <input 
           v-model="newCol" 
           class="nodrag"
-          placeholder="Neue Spalte..." 
+          placeholder="New Column..." 
           @keyup.enter="addColumn" 
           @paste.prevent="pasteColumns"
         />
@@ -191,7 +191,7 @@ async function pasteColumns(event: ClipboardEvent) {
     edges.value = remainingEdges
     refreshConnections()
   } catch {
-    window.alert('Die Zwischenablage konnte nicht gelesen werden.')
+    window.alert('Could not read the clipboard.')
   }
 }
 

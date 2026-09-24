@@ -16,7 +16,7 @@ export const rawData = ref<PipelineData>({
 export const nodes = ref<Node<any>[]>([])
 export const edges = ref<Edge[]>([])
 
-// Evaluator: Berechnet die Ausgabetabelle anhand der Verbindungen
+// Evaluator: Calculates the output table from the connections
 export const outputTable = computed(() => {
   if (!rawData.value.rows.length) return { headers: [], rows: [] }
 
@@ -36,28 +36,28 @@ export const outputTable = computed(() => {
     edgeList: edges.value as Edge[]
   }
 
-  // Hilfsfunktion: Ermittelt den Datenstrom für ein bestimmtes Input-Handle
+  // Helper: Gets the data stream for a specific input handle
   function getStreamForHandle(nodeId: string, handleId: string, context = rootContext): any[] {
-    // Finde eingehende Verbindung
+    // Find the incoming connection
     const edge = context.edgeList.find((e) => e.target === nodeId && e.targetHandle === handleId)
     if (!edge) return context.externalInputs?.get(`${nodeId}:${handleId}`) || rawData.value.rows.map(() => '')
 
     const sourceNode = context.nodeList.find((n) => n.id === edge.source)
     if (!sourceNode) return rawData.value.rows.map(() => '')
 
-    // 1. Input Node: Liefert direkt die Spaltendaten
+    // 1. Input Node: Provides the column data directly
     if (sourceNode.type === 'input') {
       const colName = edge.sourceHandle ?? ''
       return rawData.value.rows.map((r) => r[colName] ?? '')
     }
 
-    // String Node: Liefert denselben festen Wert für jede Datenzeile
+    // String Node: Provides the same fixed value for every data row
     if (sourceNode.type === 'string') {
       const value = sourceNode.data?.value ?? ''
       return rawData.value.rows.map(() => value)
     }
 
-    // Counter Node: Erzeugt pro Zeile einen fortlaufenden String-Wert
+    // Counter Node: Generates a sequential string value for each row
     if (sourceNode.type === 'counter') {
       const step = Number(sourceNode.data?.step ?? 1)
       const increment = Number.isFinite(step) ? step : 1
@@ -74,7 +74,7 @@ export const outputTable = computed(() => {
       return startValues.map((startValue, index) => String(startValue + index * increment))
     }
 
-    // Unique Count Node: Zählt hoch, wenn die Kombination aller Inputs eindeutig und noch nicht vorgekommen ist
+    // Unique Count Node: Increments when an input combination is unique and has not appeared before
     if (sourceNode.type === 'uniqueCountNode' || sourceNode.type === 'uniqueCount') {
       const step = Number(sourceNode.data?.step ?? 1)
       const increment = Number.isFinite(step) ? step : 1
@@ -118,7 +118,7 @@ export const outputTable = computed(() => {
       })
     }
 
-    // Coalesce Node: Liefert pro Zeile den ersten nicht-leeren String-Wert
+    // Coalesce Node: Returns the first non-empty string value for each row
     if (sourceNode.type === 'coalesce') {
       const inputCount = sourceNode.data?.inputCount || 0
       const inputStreams = Array.from({ length: inputCount }, (_, index) => (
@@ -134,7 +134,7 @@ export const outputTable = computed(() => {
       })
     }
 
-    // Compare Node: Vergleicht zwei String-Streams und gibt true oder false aus
+    // Compare Node: Compares two string streams and returns true or false
     if (sourceNode.type === 'compare') {
       const leftStream = getStreamForHandle(sourceNode.id, 'leftString', context)
       const rightStream = getStreamForHandle(sourceNode.id, 'rightString', context)
@@ -155,7 +155,7 @@ export const outputTable = computed(() => {
       })
     }
 
-    // If Node: Gibt pro Zeile den Then- oder Else-Wert zurück
+    // If Node: Returns the Then or Else value for each row
     if (sourceNode.type === 'if') {
       const conditionStream = getStreamForHandle(sourceNode.id, 'condition', context)
       const thenStream = getStreamForHandle(sourceNode.id, 'then', context)
@@ -199,7 +199,7 @@ export const outputTable = computed(() => {
       return getStreamForHandle(virtualGroup.id, internalOutput, embeddedContext)
     }
 
-    // Group Node: Leitet Werte zwischen äusseren und inneren Ports weiter
+    // Group Node: Passes values between external and internal ports
     if (sourceNode.type === 'group') {
       const sHandle = edge.sourceHandle || ''
 
@@ -235,7 +235,7 @@ export const outputTable = computed(() => {
       return rawData.value.rows.map(() => '')
     }
 
-    // Combine Strings Node: Verbindet zwei Werte pro Zeile mit einem Separator
+    // Combine Strings Node: Joins two values per row with a separator
     if (sourceNode.type === 'combine') {
       const string1 = getStreamForHandle(sourceNode.id, 'string1', context)
       const string2 = getStreamForHandle(sourceNode.id, 'string2', context)
@@ -246,7 +246,7 @@ export const outputTable = computed(() => {
       ))
     }
 
-    // Join Node: Sammelt beliebig viele String-Streams zu einem Array pro Zeile
+    // Join Node: Collects any number of string streams into an array per row
     if (sourceNode.type === 'join') {
       const inputCount = sourceNode.data?.inputCount || 0
       const inputStreams = Array.from({ length: inputCount }, (_, index) => (
@@ -258,7 +258,7 @@ export const outputTable = computed(() => {
       ))
     }
 
-    // Split Node: Gibt ein Array-Element als String-Stream aus
+    // Split Node: Returns one array element as a string stream
     if (sourceNode.type === 'split') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input', context)
       const outputIndex = Number((edge.sourceHandle ?? '').replace('output-', ''))
@@ -282,7 +282,7 @@ export const outputTable = computed(() => {
       })
     }
 
-    // 2. Regex Node: Transformiert die Eingabe
+    // 2. Regex Node: Transforms the input
     if (sourceNode.type === 'regex') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input', context)
       const pattern = sourceNode.data?.pattern || ''
@@ -310,7 +310,7 @@ export const outputTable = computed(() => {
     return rawData.value.rows.map(() => '')
   }
 
-  // Befülle die Spalten des Output-Knotens
+  // Populate the output node columns
   targetColumns.forEach((colName) => {
     const stream = getStreamForHandle(outputNode.id, `target-${colName}`)
     stream.forEach((val, idx) => {

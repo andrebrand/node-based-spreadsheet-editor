@@ -1,6 +1,6 @@
 <template>
   <div class="custom-node input-node">
-    <div class="node-header">📥 Input: {{ data.fileName || 'Keine Datei' }}</div>
+    <div class="node-header">📥 Input: {{ data.fileName || 'No file' }}</div>
     <div class="node-body">
       <div v-for="header in data.headers" :key="header" class="port-row right">
         <PortLabel

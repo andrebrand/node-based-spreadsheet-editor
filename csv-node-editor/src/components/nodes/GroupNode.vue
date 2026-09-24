@@ -10,10 +10,10 @@
     <button
       class="group-save-btn nodrag"
       type="button"
-      title="GroupNode als Preset speichern"
+      title="Save Group Node as preset"
       @click.stop="handleSavePreset"
     >
-      {{ saveStatus === 'saved' ? '✓ Gespeichert' : '💾 Preset' }}
+      {{ saveStatus === 'saved' ? '✓ Saved' : '💾 Preset' }}
     </button>
 
     <div class="inputs-column">

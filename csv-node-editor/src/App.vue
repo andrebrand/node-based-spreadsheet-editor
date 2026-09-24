@@ -25,8 +25,8 @@
         :aria-orientation="previewPosition === 'right' ? 'vertical' : 'horizontal'"
         tabindex="0"
         :title="previewPosition === 'right'
-          ? 'Breite der Vorschau anpassen (Doppelklick zum Zurücksetzen)'
-          : 'Höhe der Vorschau anpassen (Doppelklick zum Zurücksetzen)'"
+          ? 'Adjust preview width (double-click to reset)'
+          : 'Adjust preview height (double-click to reset)'"
         @pointerdown="startResize"
         @dblclick="resetPreviewSize"
         @keydown.left.prevent="previewPosition === 'right' && stepResize(20)"
@@ -259,7 +259,7 @@ function handlePlanLoad(event: Event) {
     try {
       const plan = JSON.parse(String(reader.result))
       if (!Array.isArray(plan.nodes) || !Array.isArray(plan.edges) || !Array.isArray(plan.headers)) {
-        throw new Error('Ungültiges Planformat')
+        throw new Error('Invalid plan format')
       }
 
       const loadedNodes = (plan.nodes as Node<any>[]).map((node) => {
