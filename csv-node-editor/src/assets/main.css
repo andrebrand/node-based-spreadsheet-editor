@@ -102,6 +102,31 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 
 .editor-container { width: 100%; height: 100%; position: relative; }
 .toolbar { position: absolute; z-index: 10; top: 10px; left: 10px; }
+.canvas-help-button {
+  position: absolute;
+  z-index: 10;
+  top: 10px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid #0f766e;
+  border-radius: 50%;
+  background: #0f766e;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+.canvas-help-button:hover { background: #115e59; }
+.canvas-help-button:focus-visible,
+.help-close-button:focus-visible,
+.help-back-button:focus-visible,
+.decision-option:focus-visible,
+.decision-back-link:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
 .node-menu { display: inline-block; position: relative; margin-right: 6px; }
 .node-menu-toggle { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 0; background: #2563eb; color: white; border-radius: 4px; cursor: pointer; }
 .node-menu-toggle:hover {
@@ -369,6 +394,92 @@ tbody tr:hover { background-color: #f8fafc; }
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+.decision-backdrop { padding: 20px; }
+.decision-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(820px, 100%);
+  max-height: min(88vh, 900px);
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28);
+}
+.decision-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.help-eyebrow { margin-bottom: 6px; color: #0f766e; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.help-title { margin: 0; color: #1e293b; font-size: 21px; line-height: 1.3; }
+.help-close-button {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+.help-close-button:hover { background: #e2e8f0; }
+.decision-content,
+.node-reference-page { overflow-y: auto; padding: 22px 28px 28px; }
+.decision-back-link,
+.help-back-button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; color: #0f766e; font: inherit; font-weight: 400; cursor: pointer; }
+.decision-back-link { margin: 0 0 12px; padding: 0; }
+.decision-question { margin: 0 0 18px; color: #1e293b; font-size: 18px; line-height: 1.4; }
+.decision-options { display: grid; gap: 9px; }
+.decision-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 58px;
+  padding: 12px 15px;
+  border: 1px solid #dbe3e8;
+  border-radius: 5px;
+  background: #fff;
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.decision-option:hover { transform: translateY(-1px); border-color: #0f766e; background: #f0fdfa; }
+.decision-option strong { display: block; font-size: 14px; line-height: 1.4; }
+.decision-option small { display: block; margin-top: 3px; color: #64748b; font-size: 12px; line-height: 1.45; }
+.decision-arrow { flex: 0 0 auto; color: #0f766e; font-size: 25px; line-height: 1; }
+.node-reference-page { padding-top: 20px; }
+.help-summary { margin: 8px 0 22px; color: #475569; font-size: 14px; line-height: 1.6; }
+.reference-section { min-width: 0; }
+.reference-section h3 { margin: 0 0 7px; color: #1e293b; font-size: 13px; }
+.reference-section p,
+.reference-section ul { margin: 0; padding: 0; color: #475569; font-size: 13px; line-height: 1.6; }
+.reference-section ul { padding-left: 18px; }
+.reference-section li + li { margin-top: 5px; }
+.reference-io { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 20px; }
+.reference-note { margin: 18px 0 0; padding: 12px 14px; border-left: 3px solid #0f766e; background: #f0fdfa; color: #334155; font-size: 13px; line-height: 1.55; }
+.reference-topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 8px 16px; margin-bottom: 6px; }
+.reference-topbar .help-eyebrow { margin: 0; }
+.reference-topbar .help-back-button { white-space: nowrap; }
+.reference-actions { display: flex; justify-content: flex-end; margin-top: 24px; }
+.help-add-button { padding: 10px 14px; border: 0; border-radius: 4px; background: #0f766e; color: white; font: inherit; font-weight: 400; cursor: pointer; }
+.help-add-button:hover { background: #115e59; }
+.help-back-button { padding: 0; }
+@media (max-width: 600px) {
+  .decision-backdrop { padding: 10px; }
+  .decision-dialog { max-height: 94vh; }
+  .decision-header { padding: 18px 18px 14px; }
+  .decision-content,
+  .node-reference-page { padding: 18px; }
+  .reference-io { grid-template-columns: 1fr; gap: 18px; }
+  .help-title { font-size: 18px; }
 }
 .modal-title {
   margin: 0;

@@ -64,6 +64,15 @@
         </div>
       </div>
     </div>
+    <button
+      class="canvas-help-button nodrag"
+      type="button"
+      aria-label="Entscheidungshilfe öffnen"
+      title="Entscheidungshilfe"
+      @click="isHelpOpen = true"
+    >
+      ?
+    </button>
     <VueFlow
       id="flow-editor"
       :key="flowKey"
@@ -112,6 +121,11 @@
         </div>
       </div>
     </div>
+    <NodeDecisionModal
+      v-if="isHelpOpen"
+      @close="isHelpOpen = false"
+      @add-node="addRecommendedNode"
+    />
   </div>
 </template>
 
@@ -166,6 +180,23 @@ function submitNamingDialog() {
   confirmNamingDialog()
 }
 
+function addRecommendedNode(nodeKey: NodeReferenceKey) {
+  const addNode: Record<NodeReferenceKey, () => void> = {
+    string: addStringNode,
+    combineStrings: addCombineStringsNode,
+    splitString: addSplitStringNode,
+    regex: addRegexNode,
+    compare: addCompareNode,
+    if: addIfNode,
+    coalesce: addCoalesceNode,
+    counter: addCounterNode,
+    uniqueCount: addUniqueCountNode
+  }
+
+  addNode[nodeKey]()
+  isHelpOpen.value = false
+}
+
 function handleSpawnPreset(preset: GroupPreset) {
   const spawnPos = getSpawnPosition(preset.width, preset.height)
   spawnPreset(preset, spawnPos)
@@ -191,6 +222,8 @@ import CompareNode from './nodes/CompareNode.vue'
 import IfNode from './nodes/IfNode.vue'
 import GroupNode from './nodes/GroupNode.vue'
 import PresetNode from './nodes/PresetNode.vue'
+import NodeDecisionModal from './help/NodeDecisionModal.vue'
+import type { NodeReferenceKey } from './help/nodeReferences'
 
 const props = defineProps<{
   flowKey: number
@@ -198,6 +231,7 @@ const props = defineProps<{
 }>()
 
 const openMenu = ref<'strings' | 'arrays' | 'presets' | null>(null)
+const isHelpOpen = ref(false)
 
 function toggleMenu(menu: 'strings' | 'arrays' | 'presets') {
   openMenu.value = openMenu.value === menu ? null : menu
