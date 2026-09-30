@@ -13,7 +13,7 @@
           <h1 id="decision-title" class="help-title">Finde den passenden Node</h1>
         </div>
         <button class="help-close-button" type="button" aria-label="Schließen" @click="$emit('close')">
-          ×
+          <IconX :size="18" aria-hidden="true" />
         </button>
       </header>
 
@@ -55,6 +55,7 @@
 
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
+import { IconX } from '@tabler/icons-vue'
 import NodeReferencePage from './NodeReferencePage.vue'
 import type { NodeReferenceKey } from './nodeReferences'
 

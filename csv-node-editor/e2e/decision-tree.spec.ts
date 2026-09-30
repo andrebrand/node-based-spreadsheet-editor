@@ -15,7 +15,7 @@ test('decision helper adds the recommended node and omits array nodes', async ({
   await dialog.getByRole('button', { name: /Den ersten ausgefüllten Wert/ }).click()
   await expect(dialog.getByRole('heading', { name: 'Coalesce Node' })).toBeVisible()
   await expect(dialog).toContainText('ersten vorhandenen Wert')
-  await dialog.getByRole('button', { name: 'Coalesce Node zum Canvas hinzufügen' }).click()
+  await dialog.getByRole('button', { name: 'Coalesce Node hinzufügen' }).click()
   await expect(dialog).toBeHidden()
   await expect(page.locator('.custom-node.coalesce-node')).toHaveCount(1)
 })
