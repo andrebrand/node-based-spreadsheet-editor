@@ -2,10 +2,10 @@
   <div class="table-preview">
     <div class="table-preview-header">
       <div class="table-preview-title-group">
-        <h3>Preview table</h3>
+        <h3>{{ previewSource === 'input' ? 'Input preview' : 'Output preview' }}</h3>
       </div>
       <div class="table-preview-actions">
-        <div v-if="outputTable.headers.length" class="download-buttons">
+        <div v-if="previewSource === 'output' && outputTable.headers.length" class="download-buttons">
           <button class="download-csv-btn" type="button" @click="downloadCsv">
             Download CSV
           </button>
@@ -25,16 +25,16 @@
         }]" @change="$emit('toggle-position')" />
       </div>
     </div>
-    <div class="table-wrapper" v-if="outputTable.headers.length">
+    <div class="table-wrapper" v-if="previewTable.headers.length">
       <table>
         <thead>
           <tr>
-            <th v-for="header in outputTable.headers" :key="header">{{ header }}</th>
+            <th v-for="header in previewTable.headers" :key="header">{{ header }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row, i) in outputTable.rows" :key="i">
-            <td v-for="header in outputTable.headers" :key="header">{{ row[header] }}</td>
+          <tr v-for="(row, i) in previewTable.rows" :key="i">
+            <td v-for="header in previewTable.headers" :key="header">{{ row[header] }}</td>
           </tr>
         </tbody>
       </table>
@@ -47,7 +47,8 @@
 
 <script setup lang="ts">
 import * as XLSX from 'xlsx'
-import { outputTable, rawData } from '../composables/usePipeline'
+import { computed } from 'vue'
+import { outputTable, previewSource, rawData } from '../composables/usePipeline'
 import SwitchButton from './core/SwitchButton.vue'
 import { IconLayoutSidebarRightInactive, IconLayoutBottombarInactive } from '@tabler/icons-vue'
 
@@ -63,6 +64,11 @@ const props = withDefaults(
 defineEmits<{
   (e: 'toggle-position'): void
 }>()
+
+const previewTable = computed(() => previewSource.value === 'input'
+  ? { headers: rawData.value.headers, rows: rawData.value.rows }
+  : outputTable.value
+)
 
 function escapeCsvValue(value: unknown) {
   const text = String(value ?? '')

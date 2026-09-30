@@ -1,6 +1,19 @@
 <template>
   <div class="custom-node input-node">
-    <div class="node-header">📥 Input: {{ data.fileName || 'No file' }}</div>
+    <div class="node-header input-node-header">
+      <button
+        class="output-pin-btn input-preview-toggle nodrag"
+        :class="{ active: previewSource === 'input' }"
+        type="button"
+        :title="previewSource === 'input' ? 'Show output preview' : 'Show input preview'"
+        :aria-label="previewSource === 'input' ? 'Show output preview' : 'Show input preview'"
+        :aria-pressed="previewSource === 'input'"
+        @click.stop="togglePreviewSource"
+      >
+        <IconEye :size="16" aria-hidden="true" />
+      </button>
+      <span>📥 Input: {{ data.fileName || 'No file' }}</span>
+    </div>
     <div class="node-body">
       <div v-for="header in data.headers" :key="header" class="port-row right">
         <PortLabel
@@ -17,8 +30,10 @@
 
 <script setup lang="ts">
 import { Handle, Position } from '@vue-flow/core'
+import { IconEye } from '@tabler/icons-vue'
 import type { NodeProps } from '@vue-flow/core'
 import PortLabel from './PortLabel.vue'
+import { previewSource } from '../../composables/usePipeline'
 import { setNodePortName } from '../../composables/usePortNames'
 
 const props = defineProps<NodeProps<{
@@ -34,5 +49,9 @@ function setPortName(portId: string, newName: string) {
 
 function deleteNode() {
   props.data.onDelete()
+}
+
+function togglePreviewSource() {
+  previewSource.value = previewSource.value === 'input' ? 'output' : 'input'
 }
 </script>

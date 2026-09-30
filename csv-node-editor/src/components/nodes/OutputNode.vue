@@ -4,8 +4,10 @@
       <span>📤 Output Schema</span>
       <button
         class="output-pin-btn nodrag"
+        :class="{ active: data.pinned }"
         type="button"
         :title="data.pinned ? 'Unpin output schema' : 'Pin output schema'"
+        :aria-pressed="data.pinned"
         @click.stop="togglePinned"
       >
         {{ data.pinned ? '📌 Pinned' : '📍 Pin' }}

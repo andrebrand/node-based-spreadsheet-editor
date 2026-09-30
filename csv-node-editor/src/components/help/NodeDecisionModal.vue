@@ -22,6 +22,7 @@
         :node-key="selectedNodeKey"
         @back="selectedNodeKey = null"
         @add="addSelectedNode"
+        @open-example="openExample"
       />
       <div v-else class="decision-content">
         <button
@@ -62,6 +63,7 @@ import type { NodeReferenceKey } from './nodeReferences'
 const emit = defineEmits<{
   close: []
   addNode: [nodeKey: NodeReferenceKey]
+  openExample: [nodeKey: NodeReferenceKey, exampleIndex: number]
 }>()
 
 interface DecisionOption {
@@ -139,6 +141,11 @@ const dialogRef = ref<HTMLElement | null>(null)
 
 function addSelectedNode() {
   if (selectedNodeKey.value) emit('addNode', selectedNodeKey.value)
+}
+
+function openExample(nodeKey: NodeReferenceKey, exampleIndex: number) {
+  emit('openExample', nodeKey, exampleIndex)
+  emit('close')
 }
 
 onMounted(() => {

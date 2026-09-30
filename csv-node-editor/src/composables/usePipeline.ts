@@ -15,6 +15,7 @@ export const rawData = ref<PipelineData>({
 
 export const nodes = ref<Node<any>[]>([])
 export const edges = ref<Edge[]>([])
+export const previewSource = ref<'input' | 'output'>('output')
 
 // Evaluator: Calculates the output table from the connections
 export const outputTable = computed(() => {

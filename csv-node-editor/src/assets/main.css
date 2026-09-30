@@ -143,9 +143,15 @@ body { margin: 0; font-family: sans-serif; background: #f4f5f7; }
 .custom-node { background: white; border: 1px solid #cbd5e1; border-radius: 6px; width: 220px; font-size: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 .vue-flow__node-group { z-index: -1; }
 .node-header { background: #f8fafc; padding: 8px; border-bottom: 1px solid #cbd5e1; font-weight: bold; border-radius: 6px 6px 0 0; }
+.input-node-header { display: flex; align-items: center; gap: 7px; }
+.input-preview-toggle { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 24px; padding: 3px; }
 .output-node-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .output-pin-btn { border: 1px solid #cbd5e1; border-radius: 3px; padding: 3px 6px; background: white; color: #334155; cursor: pointer; font-size: 10px; }
 .output-pin-btn:hover { background: #e2e8f0; }
+.input-preview-toggle.active { border-color: #2563eb; background: #dbeafe; color: #1d4ed8; }
+.input-preview-toggle.active:hover { background: #bfdbfe; }
+.output-node .output-pin-btn.active { border-color: #ef4444; background: #fee2e2; color: #dc2626; }
+.output-node .output-pin-btn.active:hover { background: #fecaca; }
 .node-title-text { cursor: text; }
 .node-title-input { width: 100%; padding: 2px 4px; border: 1px solid #93c5fd; border-radius: 3px; font-size: 12px; font-weight: bold; }
 .node-body { padding: 10px; }
@@ -486,6 +492,9 @@ tbody tr:hover { background-color: #f8fafc; }
 .example-table tbody tr:last-child td { border-bottom: 0; }
 .example-table em { color: #94a3a0; font-style: normal; }
 .example-arrow { justify-self: center; color: #0f766e; }
+.example-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+.help-example-button { padding: 8px 11px; border: 1px solid #b9d4cd; border-radius: 4px; background: #fff; color: #0f766e; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.help-example-button:hover { border-color: #0f766e; background: #edf7f3; }
 .reference-topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px 16px; margin-bottom: 6px; }
 .reference-topbar .help-eyebrow { grid-column: 2; margin: 0; justify-self: center; white-space: nowrap; }
 .reference-topbar .help-back-button { grid-column: 1; justify-self: start; white-space: nowrap; }

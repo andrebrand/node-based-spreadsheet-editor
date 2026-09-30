@@ -16,7 +16,7 @@
       :class="['position-' + previewPosition, { 'is-resizing': isResizing }]"
     >
       <div class="editor-pane">
-        <NodeEditor :flow-key="flowKey" :on-input-delete="resetApp" />
+        <NodeEditor :flow-key="flowKey" :on-input-delete="resetApp" @load-example="handleExampleRequest" />
       </div>
       <div
         class="pane-resizer nodrag"
@@ -54,6 +54,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import type { Edge, Node } from '@vue-flow/core'
 import { rawData, nodes, edges } from './composables/usePipeline'
 import { getNodePortName, isTargetHandle, normalizeTargetHandle } from './composables/usePortNames'
+import { nodeReferences, type NodeExample, type NodeReferenceKey } from './components/help/nodeReferences'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const planFileInput = ref<HTMLInputElement | null>(null)
@@ -208,11 +209,83 @@ function handleWindowResize() {
 
 onMounted(() => {
   window.addEventListener('resize', handleWindowResize)
+  loadExampleFromUrl()
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleWindowResize)
 })
+
+function getExample(nodeName: string, exampleIndex: number): NodeExample | undefined {
+  if (!Number.isInteger(exampleIndex) || exampleIndex < 0) return
+  if (!Object.prototype.hasOwnProperty.call(nodeReferences, nodeName)) return
+
+  const reference = nodeReferences[nodeName as NodeReferenceKey]
+  return [reference.example, ...(reference.additionalExamples ?? [])][exampleIndex]
+}
+
+function handleExampleRequest(nodeName: NodeReferenceKey, exampleIndex: number) {
+  const example = getExample(nodeName, exampleIndex)
+  if (!example) return
+
+  if (rawData.value.fileName || nodes.value.length || edges.value.length) {
+    const exampleUrl = new URL(window.location.pathname, window.location.origin)
+    exampleUrl.searchParams.set('node', nodeName)
+    exampleUrl.searchParams.set('example', String(exampleIndex))
+    window.open(exampleUrl.toString(), '_blank', 'noopener,noreferrer')
+    return
+  }
+
+  loadExampleIntoCanvas(example)
+}
+
+function loadExampleFromUrl() {
+  const params = new URLSearchParams(window.location.search)
+  const nodeName = params.get('node')
+  const serializedIndex = params.get('example')
+  if (!nodeName || serializedIndex === null) return
+
+  const exampleIndex = Number(serializedIndex)
+  const example = getExample(nodeName, exampleIndex)
+  if (example) loadExampleIntoCanvas(example)
+}
+
+function loadExampleIntoCanvas(example: NodeExample) {
+  const rows = example.inputRows.map((cells) => Object.fromEntries(
+    example.inputHeaders.map((header, index) => [header, cells[index] ?? ''])
+  ))
+  const transformNodes: Node<any>[] = example.canvasNodes.map((node, index) => ({
+    id: node.id,
+    type: node.type,
+    position: { x: 390, y: 100 + index * 220 },
+    data: { ...node.data }
+  }))
+  const inputNode: Node<any> = {
+    id: 'node_input',
+    type: 'input',
+    position: { x: 30, y: 140 },
+    data: {
+      fileName: 'Beispiel.csv',
+      headers: [...example.inputHeaders],
+      onDelete: resetApp
+    }
+  }
+  const outputNode: Node<any> = {
+    id: 'node_output',
+    type: 'output',
+    position: { x: 850, y: 140 },
+    data: { columns: [...example.outputHeaders] }
+  }
+  const exampleEdges: Edge[] = example.canvasEdges.map((edge, index) => ({
+    ...edge,
+    id: `example-edge-${index}`
+  }))
+
+  rawData.value = { fileName: 'Beispiel.csv', headers: [...example.inputHeaders], rows }
+  nodes.value = [inputNode, ...transformNodes, outputNode]
+  edges.value = exampleEdges
+  flowKey.value += 1
+}
 
 function resetApp() {
   rawData.value = {

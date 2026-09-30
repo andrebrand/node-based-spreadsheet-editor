@@ -125,6 +125,7 @@
       v-if="isHelpOpen"
       @close="isHelpOpen = false"
       @add-node="addRecommendedNode"
+      @open-example="forwardExample"
     />
   </div>
 </template>
@@ -230,6 +231,10 @@ const props = defineProps<{
   onInputDelete: () => void
 }>()
 
+const emit = defineEmits<{
+  loadExample: [nodeKey: NodeReferenceKey, exampleIndex: number]
+}>()
+
 const openMenu = ref<'strings' | 'arrays' | 'presets' | null>(null)
 const isHelpOpen = ref(false)
 
@@ -239,6 +244,10 @@ function toggleMenu(menu: 'strings' | 'arrays' | 'presets') {
 
 function closeMenu() {
   openMenu.value = null
+}
+
+function forwardExample(nodeKey: NodeReferenceKey, exampleIndex: number) {
+  emit('loadExample', nodeKey, exampleIndex)
 }
 
 function preventDragOnInteractive(event: Event) {

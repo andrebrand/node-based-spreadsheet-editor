@@ -87,6 +87,11 @@
           </div>
         </div>
       </div>
+      <div class="example-actions">
+        <button class="help-example-button" type="button" @click="$emit('openExample', props.nodeKey, exampleIndex)">
+          Beispiel im Canvas öffnen
+        </button>
+      </div>
     </section>
 
     <div class="reference-actions">
@@ -106,6 +111,7 @@ const props = defineProps<{ nodeKey: NodeReferenceKey }>()
 defineEmits<{
   back: []
   add: []
+  openExample: [nodeKey: NodeReferenceKey, exampleIndex: number]
 }>()
 
 const reference = computed(() => nodeReferences[props.nodeKey])
