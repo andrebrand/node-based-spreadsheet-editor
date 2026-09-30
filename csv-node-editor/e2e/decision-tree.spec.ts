@@ -27,7 +27,7 @@ test('decision helper opens a connected example pipeline in an empty canvas', as
   await page.getByRole('button', { name: 'Entscheidungshilfe öffnen' }).click()
   await dialog.getByRole('button', { name: /Werte aus mehreren Spalten/ }).click()
   await dialog.getByRole('button', { name: /Die Werte zu einem Text verbinden/ }).click()
-  await dialog.getByRole('button', { name: 'Beispiel im Canvas öffnen' }).click()
+  await dialog.getByRole('button', { name: 'Beispiel im Editor öffnen' }).click()
 
   await expect(dialog).toBeHidden()
   await expect(page.locator('.custom-node.input-node')).toContainText('Beispiel.csv')
@@ -48,7 +48,7 @@ test('decision helper opens an example in a new tab when a file is loaded', asyn
   await dialog.getByRole('button', { name: /Die Werte zu einem Text verbinden/ }).click()
 
   const popupPromise = page.context().waitForEvent('page')
-  await dialog.getByRole('button', { name: 'Beispiel im Canvas öffnen' }).click()
+  await dialog.getByRole('button', { name: 'Beispiel im Editor öffnen' }).click()
   const popup = await popupPromise
 
   const popupUrl = new URL(popup.url())
@@ -61,4 +61,9 @@ test('decision helper opens an example in a new tab when a file is loaded', asyn
   await expect(popup.locator('.table-preview')).toContainText('Länge: 5 m')
   await expect(page.locator('.custom-node.input-node')).toContainText('example.csv')
   await expect(page.locator('.custom-node.combine-node')).toHaveCount(0)
+
+  await popup.locator('.custom-node.input-node .delete-node-btn').click()
+  await expect.poll(() => new URL(popup.url()).search).toBe('')
+  await popup.reload()
+  await expect(popup.locator('.custom-node.input-node')).toHaveCount(0)
 })

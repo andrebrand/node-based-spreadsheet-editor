@@ -288,6 +288,11 @@ function loadExampleIntoCanvas(example: NodeExample) {
 }
 
 function resetApp() {
+  const currentUrl = new URL(window.location.href)
+  currentUrl.searchParams.delete('node')
+  currentUrl.searchParams.delete('example')
+  window.history.replaceState(window.history.state, '', `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`)
+
   rawData.value = {
     fileName: '',
     headers: [],

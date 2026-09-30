@@ -89,7 +89,7 @@
       </div>
       <div class="example-actions">
         <button class="help-example-button" type="button" @click="$emit('openExample', props.nodeKey, exampleIndex)">
-          Beispiel im Canvas öffnen
+          Beispiel im Editor öffnen
         </button>
       </div>
     </section>
