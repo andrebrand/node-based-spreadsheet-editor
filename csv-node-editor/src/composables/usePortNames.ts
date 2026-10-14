@@ -65,6 +65,22 @@ export function getNodePortName(node: any, handleId?: string | null, _side?: 'so
     if (handleId === 'output') return 'true / false'
   }
 
+  if (node.type === 'condition') {
+    if (handleId === 'value1') return 'Value 1'
+    if (handleId === 'value2') return 'Value 2'
+    if (handleId === 'output') return 'true / false'
+  }
+
+  if (node.type === 'notNode') {
+    if (handleId === 'input') return 'Input'
+    if (handleId === 'output') return 'true / false'
+  }
+
+  if (node.type === 'isNumeric') {
+    if (handleId === 'input') return 'Input'
+    if (handleId === 'output') return 'true / false'
+  }
+
   // 7. Counter node
   if (node.type === 'counter') {
     if (handleId === 'start') return 'Start value'
@@ -160,6 +176,9 @@ export function isTargetHandle(nodeType: string | undefined, handleId: string): 
   if (nodeType === 'string') return false
   if (nodeType === 'combine') return handleId === 'string1' || handleId === 'string2' || handleId === 'separator'
   if (nodeType === 'compare') return handleId === 'leftString' || handleId === 'rightString'
+  if (nodeType === 'condition') return handleId === 'value1' || handleId === 'value2'
+  if (nodeType === 'notNode') return handleId === 'input'
+  if (nodeType === 'isNumeric') return handleId === 'input'
   if (nodeType === 'counter') return handleId === 'start'
   if (nodeType === 'uniqueCountNode' || nodeType === 'uniqueCount') return handleId === 'start' || handleId.startsWith('input-')
   if (nodeType === 'coalesce') return handleId.startsWith('input-')

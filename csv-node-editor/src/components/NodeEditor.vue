@@ -20,6 +20,9 @@
           <button @click="addCoalesceNode(); closeMenu()">🔀 Coalesce Node</button>
           <button @click="addMappingNode(); closeMenu()">🗺 Mapping Node</button>
           <button @click="addCompareNode(); closeMenu()">⚖ Compare Node</button>
+          <button @click="addConditionNode(); closeMenu()">🔗 Condition Node</button>
+          <button @click="addNotNode(); closeMenu()">🚫 Not Node</button>
+          <button @click="addIsNumericNode(); closeMenu()">🔢 IsNumeric Node</button>
           <button @click="addIfNode(); closeMenu()">✅ If Node</button>
           <button @click="addGroupNode(); closeMenu()">🔳 Group Node</button>
         </div>
@@ -189,6 +192,9 @@ function addRecommendedNode(nodeKey: NodeReferenceKey) {
     splitString: addSplitStringNode,
     regex: addRegexNode,
     compare: addCompareNode,
+    condition: addConditionNode,
+    not: addNotNode,
+    isNumeric: addIsNumericNode,
     if: addIfNode,
     coalesce: addCoalesceNode,
     mapping: addMappingNode,
@@ -223,6 +229,9 @@ import UniqueCountNode from './nodes/UniqueCountNode.vue'
 import CoalesceNode from './nodes/CoalesceNode.vue'
 import MappingNode from './nodes/MappingNode.vue'
 import CompareNode from './nodes/CompareNode.vue'
+import ConditionNode from './nodes/ConditionNode.vue'
+import NotNode from './nodes/NotNode.vue'
+import IsNumericNode from './nodes/IsNumericNode.vue'
 import IfNode from './nodes/IfNode.vue'
 import GroupNode from './nodes/GroupNode.vue'
 import PresetNode from './nodes/PresetNode.vue'
@@ -390,6 +399,9 @@ const nodeTypes: NodeTypesObject = {
   coalesce: markRaw(CoalesceNode),
   mapping: markRaw(MappingNode),
   compare: markRaw(CompareNode),
+  condition: markRaw(ConditionNode),
+  notNode: markRaw(NotNode),
+  isNumeric: markRaw(IsNumericNode),
   if: markRaw(IfNode),
   group: markRaw(GroupNode),
   preset: markRaw(PresetNode)
@@ -848,6 +860,39 @@ function addCompareNode() {
     label: 'Compare',
     position: getSpawnPosition(140, 200),
     data: { operator: 'equals' }
+  })
+}
+
+function addConditionNode() {
+  const id = `condition_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'condition',
+    label: 'Condition',
+    position: getSpawnPosition(180, 200),
+    data: { operator: 'and' }
+  })
+}
+
+function addNotNode() {
+  const id = `not_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'notNode',
+    label: 'Not',
+    position: getSpawnPosition(160, 160),
+    data: {}
+  })
+}
+
+function addIsNumericNode() {
+  const id = `isNumeric_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'isNumeric',
+    label: 'IsNumeric',
+    position: getSpawnPosition(220, 180),
+    data: { allowDecimalSeparators: true }
   })
 }
 

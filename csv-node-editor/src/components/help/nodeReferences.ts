@@ -4,6 +4,9 @@ export type NodeReferenceKey =
   | 'splitString'
   | 'regex'
   | 'compare'
+  | 'condition'
+  | 'not'
+  | 'isNumeric'
   | 'if'
   | 'coalesce'
   | 'mapping'
@@ -174,6 +177,71 @@ export const nodeReferences: Record<NodeReferenceKey, NodeReference> = {
         { source: 'node_input', sourceHandle: 'Wert A', target: 'compare', targetHandle: 'leftString' },
         { source: 'node_input', sourceHandle: 'Wert B', target: 'compare', targetHandle: 'rightString' },
         { source: 'compare', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-Ergebnis' }
+      ]
+    }
+  },
+  condition: {
+    title: 'Condition Node',
+    summary: 'Verknüpft zwei Werte anhand ihrer Wahrheit mit AND, OR oder XOR.',
+    useCase: 'Zum Beispiel prüfen, ob eine E-Mail-Adresse vorhanden und eine Zustimmung erteilt wurde.',
+    inputs: ['Value 1 und Value 2: Die Werte werden jeweils als wahr oder falsch ausgewertet. „true“ und „false“ (Groß-/Kleinschreibung egal) werden als boolische Werte erkannt; andere gefüllte Werte gelten als wahr, leere Werte als falsch.'],
+    outputs: ['Das Ergebnis der Verknüpfung als „true“ oder „false“.'],
+    example: {
+      inputHeaders: ['E-Mail vorhanden?', 'Zustimmung erteilt?'],
+      inputRows: [['true', 'true'], ['true', 'false'], ['', 'true']],
+      detail: 'Verknüpfung: AND. Das Ergebnis ist nur wahr, wenn beide Eingaben wahr sind.',
+      outputHeaders: ['Beide Bedingungen erfüllt?'],
+      outputRows: [['true'], ['false'], ['false']],
+      canvasNodes: [
+        { id: 'condition', type: 'condition', data: { operator: 'and', label: 'Beide Bedingungen erfüllt?' } }
+      ],
+      canvasEdges: [
+        { source: 'node_input', sourceHandle: 'E-Mail vorhanden?', target: 'condition', targetHandle: 'value1' },
+        { source: 'node_input', sourceHandle: 'Zustimmung erteilt?', target: 'condition', targetHandle: 'value2' },
+        { source: 'condition', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-Beide Bedingungen erfüllt?' }
+      ]
+    }
+  },
+  not: {
+    title: 'Not Node',
+    summary: 'Kehrt den Wahrheitswert eines einzelnen Eingabewerts um.',
+    useCase: 'Zum Beispiel aus „E-Mail fehlt“ eine Bedingung machen, die wahr ist, wenn das Feld leer ist.',
+    inputs: ['Input: Ein Wert, der als wahr oder falsch ausgewertet wird. „true“ und „false“ (Groß-/Kleinschreibung egal) werden als boolische Werte erkannt; andere gefüllte Werte gelten als wahr, leere Werte als falsch.'],
+    outputs: ['Das Gegenteil des Eingabewerts als „true“ oder „false“.'],
+    example: {
+      inputHeaders: ['E-Mail vorhanden?'],
+      inputRows: [['true'], ['false'], ['']],
+      detail: 'Der Not Node kehrt jeden Wahrheitswert um: true wird false, false wird true.',
+      outputHeaders: ['E-Mail fehlt?'],
+      outputRows: [['false'], ['true'], ['true']],
+      canvasNodes: [
+        { id: 'not', type: 'notNode', data: { label: 'E-Mail fehlt?' } }
+      ],
+      canvasEdges: [
+        { source: 'node_input', sourceHandle: 'E-Mail vorhanden?', target: 'not', targetHandle: 'input' },
+        { source: 'not', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-E-Mail fehlt?' }
+      ]
+    }
+  },
+  isNumeric: {
+    title: 'IsNumeric Node',
+    summary: 'Prüft, ob ein Wert eine numerische Zeichenfolge ist.',
+    useCase: 'Zum Beispiel erkennen, welche Tabellenzellen Zahlen statt Text enthalten.',
+    inputs: ['Input: Der Wert, der auf eine Zahl geprüft wird.'],
+    outputs: ['„true“, wenn der Wert eine numerische Zeichenfolge ist, sonst „false“.'],
+    note: 'Mit der Option „Allow comma and period as decimal separators“ werden Dezimalzahlen mit Komma oder Punkt erkannt. Es wird jeweils nur ein Dezimaltrennzeichen unterstützt; Tausendertrennzeichen werden nicht akzeptiert.',
+    example: {
+      inputHeaders: ['Wert'],
+      inputRows: [['42'], ['3,14'], ['abc']],
+      detail: 'Mit Komma und Punkt als Dezimaltrennzeichen aktiviert.',
+      outputHeaders: ['Numerisch?'],
+      outputRows: [['true'], ['true'], ['false']],
+      canvasNodes: [
+        { id: 'numeric', type: 'isNumeric', data: { allowDecimalSeparators: true, label: 'Numerisch?' } }
+      ],
+      canvasEdges: [
+        { source: 'node_input', sourceHandle: 'Wert', target: 'numeric', targetHandle: 'input' },
+        { source: 'numeric', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-Numerisch?' }
       ]
     }
   },

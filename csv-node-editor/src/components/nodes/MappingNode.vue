@@ -15,31 +15,33 @@
         <button class="small-node-btn nodrag" type="button" @click="swapPairs">
           Swap keys and values
         </button>
-        <div v-for="(pair, index) in data.pairs" :key="index" class="mapping-pair">
-          <input
-            v-model="pair.key"
-            class="nodrag"
-            type="text"
-            :aria-label="`Key ${index + 1}`"
-            placeholder="Key"
-            @paste="handlePairPaste(index, $event)"
-          />
-          <input
-            v-model="pair.value"
-            class="nodrag"
-            type="text"
-            :aria-label="`Value ${index + 1}`"
-            placeholder="Value"
-          />
-          <button
-            class="mapping-remove-btn nodrag"
-            type="button"
-            :aria-label="`Remove pair ${index + 1}`"
-            title="Remove pair"
-            @click="removePair(index)"
-          >
-            ×
-          </button>
+        <div class="mapping-pair-list">
+          <div v-for="(pair, index) in data.pairs" :key="index" class="mapping-pair">
+            <input
+              v-model="pair.key"
+              class="nodrag"
+              type="text"
+              :aria-label="`Key ${index + 1}`"
+              placeholder="Key"
+              @paste="handlePairPaste(index, $event)"
+            />
+            <input
+              v-model="pair.value"
+              class="nodrag"
+              type="text"
+              :aria-label="`Value ${index + 1}`"
+              placeholder="Value"
+            />
+            <button
+              class="mapping-remove-btn nodrag"
+              type="button"
+              :aria-label="`Remove pair ${index + 1}`"
+              title="Remove pair"
+              @click="removePair(index)"
+            >
+              ×
+            </button>
+          </div>
         </div>
         <button class="small-node-btn nodrag" type="button" @click="addPair">+ Pair</button>
       </div>
@@ -138,8 +140,29 @@ function deleteNode() {
 </script>
 
 <style scoped>
+.mapping-node {
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mapping-node > .node-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mapping-node > .node-body > :not(.mapping-pairs) {
+  flex: 0 0 auto;
+}
+
 .mapping-case-option {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 6px;
   margin: 8px 0;
@@ -148,13 +171,25 @@ function deleteNode() {
 
 .mapping-pairs {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 4px;
   margin: 8px 0;
+  min-height: 0;
+}
+
+.mapping-pair-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .mapping-pair {
   display: grid;
+  flex: 0 0 auto;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 20px;
   gap: 4px;
 }

@@ -101,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import { NodeResizer } from '@vue-flow/node-resizer'
 import type { OnResize, OnResizeEnd } from '@vue-flow/node-resizer'
@@ -128,7 +128,7 @@ const props = defineProps<NodeProps<{
   outputs?: GroupPortItem[]
 }>>()
 
-const { removeNodes, findNode } = useVueFlow()
+const { removeNodes, findNode, updateNodeInternals } = useVueFlow()
 
 if (props.data) {
   if (!Array.isArray(props.data.inputs)) {
@@ -148,6 +148,7 @@ const outputList = computed(() => props.data?.outputs || [])
 
 function setPortName(portId: string, newName: string) {
   setNodePortName(props.data, portId, newName)
+  nextTick(() => updateNodeInternals([props.id]))
 }
 
 function addInputPort() {

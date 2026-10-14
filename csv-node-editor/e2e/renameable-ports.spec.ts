@@ -57,6 +57,42 @@ test.describe('Renameable Ports & Connection Preservation Tests', () => {
     await expect(string1Label).toHaveText('Prefix')
   })
 
+  test('updates GroupNode handle positions immediately after renaming ports', async ({ page }) => {
+    await page.goto('/')
+
+    await page.getByRole('button', { name: '+ Functions' }).click()
+    await page.getByRole('button', { name: '🔳 Group Node' }).click()
+
+    const groupNode = page.locator('.vue-flow__node-group')
+    await expect(groupNode).toBeVisible()
+
+    const inputLabel = groupNode.locator('.outer-input .port-label-text')
+    await inputLabel.dblclick()
+    await groupNode.locator('.outer-input .port-label-input').fill('A much longer input port name')
+    await groupNode.locator('.outer-input .port-label-input').press('Enter')
+
+    const outputLabel = groupNode.locator('.outer-output .port-label-text')
+    await outputLabel.dblclick()
+    await groupNode.locator('.outer-output .port-label-input').fill('A much longer output port name')
+    await groupNode.locator('.outer-output .port-label-input').press('Enter')
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const group = document.querySelector<HTMLElement>('.vue-flow__node-group')
+        const inputHandle = group?.querySelector<HTMLElement>('.vue-flow__handle-input')
+        const outputHandle = group?.querySelector<HTMLElement>('.vue-flow__handle-output')
+        if (!group || !inputHandle || !outputHandle) return Number.POSITIVE_INFINITY
+
+        const groupBounds = group.getBoundingClientRect()
+        const inputBounds = inputHandle.getBoundingClientRect()
+        const outputBounds = outputHandle.getBoundingClientRect()
+        const inputOffset = Math.abs(inputBounds.left + inputBounds.width / 2 - groupBounds.left)
+        const outputOffset = Math.abs(outputBounds.left + outputBounds.width / 2 - groupBounds.right)
+        return Math.max(inputOffset, outputOffset)
+      })
+    }).toBeLessThan(4)
+  })
+
   test('preserves connections to named ports when uploading a different input file', async ({ page }) => {
     await page.goto('/')
 
@@ -419,4 +455,3 @@ test.describe('Renameable Ports & Connection Preservation Tests', () => {
     expect(hasInput1Edge).toBe(false)
   })
 })
-

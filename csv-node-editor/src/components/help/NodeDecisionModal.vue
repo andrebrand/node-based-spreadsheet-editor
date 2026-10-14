@@ -109,6 +109,9 @@ const steps: Record<string, DecisionStep> = {
     question: 'Was möchtest du überprüfen?',
     options: [
       { label: 'Prüfen, ob zwei Werte gleich sind oder sich unterscheiden', description: 'Das Ergebnis ist „Ja“ oder „Nein“.', result: 'compare' },
+      { label: 'Zwei Werte mit AND, OR oder XOR verknüpfen', description: 'Prüfe, ob beide oder mindestens einer der Werte wahr sind.', result: 'condition' },
+      { label: 'Den Wahrheitswert eines Werts umkehren', description: 'Zum Beispiel prüfen, ob ein Feld leer ist.', result: 'not' },
+      { label: 'Prüfen, ob ein Wert eine Zahl ist', description: 'Komma und Punkt können als Dezimaltrennzeichen erlaubt werden.', result: 'isNumeric' },
       { label: 'Je nachdem, ob ein Wert vorhanden ist, einen Wert auswählen', description: 'Ein Wert wird genutzt, wenn etwas da ist, ein anderer, wenn nicht.', result: 'if' }
     ]
   },

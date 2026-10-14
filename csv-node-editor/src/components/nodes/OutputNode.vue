@@ -178,6 +178,19 @@ async function pasteColumns(event: ClipboardEvent) {
     )]
 
     if (!columns.length) return
+    if (columns.length === 1) {
+      newCol.value = columns[0]
+      return
+    }
+
+    if (props.data.pinned) {
+      const existingColumns = new Set(props.data.columns)
+      const newColumns = columns.filter((column) => !existingColumns.has(column))
+      props.data.columns.push(...newColumns)
+      newCol.value = ''
+      refreshConnections()
+      return
+    }
 
     const columnHandles = new Set(columns.map((column) => `target-${column}`))
     const edgeList = edges.value as Edge[]

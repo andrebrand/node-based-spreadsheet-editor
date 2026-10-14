@@ -17,6 +17,26 @@ export const nodes = ref<Node<any>[]>([])
 export const edges = ref<Edge[]>([])
 export const previewSource = ref<'input' | 'output'>('output')
 
+function toConditionBoolean(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+
+  const normalized = String(value ?? '').trim().toLowerCase()
+  if (normalized === 'true') return true
+  if (normalized === 'false') return false
+  return Boolean(value)
+}
+
+function isNumericString(value: unknown, allowDecimalSeparators: boolean): boolean {
+  const text = String(value ?? '').trim()
+  if (!text) return false
+
+  const pattern = allowDecimalSeparators
+    ? /^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eE][+-]?\d+)?$/
+    : /^[+-]?\d+$/
+
+  return pattern.test(text)
+}
+
 // Evaluator: Calculates the output table from the connections
 export const outputTable = computed(() => {
   if (!rawData.value.rows.length) return { headers: [], rows: [] }
@@ -156,6 +176,38 @@ export const outputTable = computed(() => {
       })
     }
 
+    // Condition Node: Combines the truthiness of two values with a boolean operator
+    if (sourceNode.type === 'condition') {
+      const leftStream = getStreamForHandle(sourceNode.id, 'value1', context)
+      const rightStream = getStreamForHandle(sourceNode.id, 'value2', context)
+      const operator = sourceNode.data?.operator || 'and'
+
+      return rawData.value.rows.map((_, rowIndex) => {
+        const left = toConditionBoolean(leftStream[rowIndex])
+        const right = toConditionBoolean(rightStream[rowIndex])
+        let result = false
+
+        if (operator === 'and') result = left && right
+        if (operator === 'or') result = left || right
+        if (operator === 'xor') result = left !== right
+
+        return String(result)
+      })
+    }
+
+    // Not Node: Negates the truthiness of its input
+    if (sourceNode.type === 'notNode') {
+      const inputStream = getStreamForHandle(sourceNode.id, 'input', context)
+      return inputStream.map((value) => String(!toConditionBoolean(value)))
+    }
+
+    // IsNumeric Node: Checks whether each input is a numeric string
+    if (sourceNode.type === 'isNumeric') {
+      const inputStream = getStreamForHandle(sourceNode.id, 'input', context)
+      const allowDecimalSeparators = sourceNode.data?.allowDecimalSeparators !== false
+      return inputStream.map((value) => String(isNumericString(value, allowDecimalSeparators)))
+    }
+
     // If Node: Returns the Then or Else value for each row
     if (sourceNode.type === 'if') {
       const conditionStream = getStreamForHandle(sourceNode.id, 'condition', context)
@@ -163,14 +215,7 @@ export const outputTable = computed(() => {
       const elseStream = getStreamForHandle(sourceNode.id, 'else', context)
 
       return rawData.value.rows.map((_, rowIndex) => {
-        const condition = conditionStream[rowIndex]
-        const isTrue = typeof condition === 'boolean'
-          ? condition
-          : String(condition ?? '').trim().toLowerCase() === 'true'
-            ? true
-            : String(condition ?? '').trim().toLowerCase() === 'false'
-              ? false
-              : Boolean(condition)
+        const isTrue = toConditionBoolean(conditionStream[rowIndex])
 
         return String(isTrue ? thenStream[rowIndex] ?? '' : elseStream[rowIndex] ?? '')
       })

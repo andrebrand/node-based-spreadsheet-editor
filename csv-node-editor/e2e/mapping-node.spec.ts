@@ -123,3 +123,32 @@ test('Mapping Node clears the last pair instead of removing its row', async ({ p
   await expect(mappingNode.getByRole('textbox', { name: 'Value 1' })).toHaveValue('')
   await expect(mappingNode.getByRole('textbox', { name: 'Key 2' })).toHaveCount(0)
 })
+
+test('Mapping Node limits its height and scrolls the key-value pairs', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: '+ Functions' }).click()
+  await page.getByRole('button', { name: '🗺 Mapping Node' }).click()
+
+  const mappingNode = page.locator('.custom-node.mapping-node')
+  const addPairButton = mappingNode.getByRole('button', { name: '+ Pair' })
+  for (let index = 0; index < 20; index++) {
+    await addPairButton.click()
+  }
+
+  const pairList = mappingNode.locator('.mapping-pair-list')
+  await expect(mappingNode).toHaveCSS('max-height', '400px')
+  await expect.poll(async () => mappingNode.evaluate((node) => node.offsetHeight))
+    .toBeLessThanOrEqual(400)
+  await expect.poll(async () => pairList.evaluate((list) => list.scrollHeight > list.clientHeight))
+    .toBe(true)
+
+  await pairList.evaluate((list) => { list.scrollTop = list.scrollHeight })
+  await expect.poll(async () => pairList.evaluate((list) => list.scrollTop > 0))
+    .toBe(true)
+  await expect.poll(async () => {
+    return pairList.evaluate((list) => {
+      const lastPair = list.lastElementChild
+      return !!lastPair && lastPair.getBoundingClientRect().bottom <= list.getBoundingClientRect().bottom
+    })
+  }).toBe(true)
+})

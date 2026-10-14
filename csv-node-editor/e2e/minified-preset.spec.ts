@@ -83,3 +83,47 @@ test('spawns compact presets and expands the same preset into a group', async ({
   await expect(page.locator('.group-node')).toBeVisible()
   await expect(page.locator('.group-node .group-node-header')).toContainText('Extract digits')
 })
+
+test('keeps a long presets menu scrollable within the viewport in bottom preview layout', async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 520 })
+  const presets = Array.from({ length: 30 }, (_, index) => ({
+    id: `preset_${index}`,
+    name: `Preset ${index + 1}`,
+    createdAt: index
+  }))
+  await page.addInitScript((storedPresets) => {
+    localStorage.setItem('csv_editor_group_presets', JSON.stringify(storedPresets))
+  }, presets)
+  await page.goto('/')
+
+  await page.getByTitle('Display the preview on the bottom').click()
+  const presetsToggle = page.getByRole('button', { name: /Presets \(30\)/ })
+  await presetsToggle.click()
+
+  const menu = page.locator('.preset-menu-items')
+  await expect(menu).toHaveCSS('overflow-y', 'auto')
+  await expect.poll(async () => menu.evaluate((element) => element.scrollHeight > element.clientHeight))
+    .toBe(true)
+  await expect.poll(async () => menu.evaluate((element) => {
+    const bounds = element.getBoundingClientRect()
+    return bounds.top >= 0 && bounds.bottom <= window.innerHeight
+  })).toBe(true)
+
+  await expect.poll(async () => page.evaluate(() => {
+    const menu = document.querySelector<HTMLElement>('.preset-menu-items')
+    const resizer = document.querySelector<HTMLElement>('.pane-resizer.resizer-bottom')
+    if (!menu || !resizer) return false
+
+    const menuBounds = menu.getBoundingClientRect()
+    const resizerBounds = resizer.getBoundingClientRect()
+    const x = Math.max(menuBounds.left, resizerBounds.left) + 2
+    const y = Math.max(menuBounds.top, resizerBounds.top) + 2
+    if (x >= Math.min(menuBounds.right, resizerBounds.right) ||
+        y >= Math.min(menuBounds.bottom, resizerBounds.bottom)) return false
+
+    return document.elementFromPoint(x, y)?.closest('.preset-menu-items') === menu
+  })).toBe(true)
+
+  await menu.evaluate((element) => { element.scrollTop = element.scrollHeight })
+  await expect(menu.locator('.preset-menu-item').last()).toBeInViewport()
+})
