@@ -128,23 +128,17 @@ const props = defineProps<NodeProps<{
   outputs?: GroupPortItem[]
 }>>()
 
-const nodeId = computed(() => props.id)
-
 const { removeNodes, findNode } = useVueFlow()
-
-function makeHandleId(type: 'input' | 'output', baseId: string): string {
-  return `${type}-${baseId}-${nodeId.value}`
-}
 
 if (props.data) {
   if (!Array.isArray(props.data.inputs)) {
     props.data.inputs = [
-      { id: makeHandleId('input', 'input'), internalId: makeHandleId('input', 'internal-input'), defaultName: 'Input' }
+      { id: 'input', internalId: 'internal-input', defaultName: 'Input' }
     ]
   }
   if (!Array.isArray(props.data.outputs)) {
     props.data.outputs = [
-      { id: makeHandleId('output', 'output'), internalId: makeHandleId('output', 'internal-output'), defaultName: 'Output' }
+      { id: 'output', internalId: 'internal-output', defaultName: 'Output' }
     ]
   }
 }
@@ -161,22 +155,15 @@ function addInputPort() {
   if (!Array.isArray(props.data.inputs)) {
     props.data.inputs = []
   }
-  const inputBaseIds = new Set(props.data.inputs.map((p: GroupPortItem) => p.id.replace(`-${nodeId.value}`, '')))
-  let baseId = 'input'
-  let newId = makeHandleId('input', 'input')
-  let newInternalId = makeHandleId('input', 'internal-input')
-  let defaultName = 'Input'
-
-  if (inputBaseIds.has('input')) {
-    let index = 1
-    while (inputBaseIds.has(`input-${index}`)) {
-      index++
-    }
-    baseId = `input-${index}`
-    newId = makeHandleId('input', baseId)
-    newInternalId = makeHandleId('input', `internal-${baseId}`)
-    defaultName = `Input ${index + 1}`
+  const inputIds = new Set(props.data.inputs.map((port: GroupPortItem) => port.id))
+  let index = 0
+  while (inputIds.has(index === 0 ? 'input' : `input-${index}`)) {
+    index++
   }
+  const baseId = index === 0 ? 'input' : `input-${index}`
+  const newId = baseId
+  const newInternalId = `internal-${baseId}`
+  const defaultName = index === 0 ? 'Input' : `Input ${index + 1}`
 
   props.data.inputs.push({
     id: newId,
@@ -214,22 +201,15 @@ function addOutputPort() {
   if (!Array.isArray(props.data.outputs)) {
     props.data.outputs = []
   }
-  const outputBaseIds = new Set(props.data.outputs.map((p: GroupPortItem) => p.id.replace(`-${nodeId.value}`, '')))
-  let baseId = 'output'
-  let newId = makeHandleId('output', 'output')
-  let newInternalId = makeHandleId('output', 'internal-output')
-  let defaultName = 'Output'
-
-  if (outputBaseIds.has('output')) {
-    let index = 1
-    while (outputBaseIds.has(`output-${index}`)) {
-      index++
-    }
-    baseId = `output-${index}`
-    newId = makeHandleId('output', baseId)
-    newInternalId = makeHandleId('output', `internal-${baseId}`)
-    defaultName = `Output ${index + 1}`
+  const outputIds = new Set(props.data.outputs.map((port: GroupPortItem) => port.id))
+  let index = 0
+  while (outputIds.has(index === 0 ? 'output' : `output-${index}`)) {
+    index++
   }
+  const baseId = index === 0 ? 'output' : `output-${index}`
+  const newId = baseId
+  const newInternalId = `internal-${baseId}`
+  const defaultName = index === 0 ? 'Output' : `Output ${index + 1}`
 
   props.data.outputs.push({
     id: newId,

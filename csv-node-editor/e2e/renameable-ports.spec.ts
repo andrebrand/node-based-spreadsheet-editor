@@ -293,10 +293,11 @@ test.describe('Renameable Ports & Connection Preservation Tests', () => {
     await addInputBtn.click()
     await expect(groupNode.locator('.inputs-column .input-pair')).toHaveCount(3)
 
-    // Add 1 output (total 2) -> different from inputs!
+    // Add 2 outputs (total 3)
     const addOutputBtn = groupNode.locator('.outputs-column .group-add-btn')
     await addOutputBtn.click()
-    await expect(groupNode.locator('.outputs-column .output-pair')).toHaveCount(2)
+    await addOutputBtn.click()
+    await expect(groupNode.locator('.outputs-column .output-pair')).toHaveCount(3)
 
     // Check handles exist with correct IDs
     await expect(groupNode.locator('.vue-flow__handle-input')).toBeVisible()
@@ -305,6 +306,18 @@ test.describe('Renameable Ports & Connection Preservation Tests', () => {
     await expect(groupNode.locator('.vue-flow__handle-internal-input-1')).toBeVisible()
     await expect(groupNode.locator('.vue-flow__handle-input-2')).toBeVisible()
     await expect(groupNode.locator('.vue-flow__handle-internal-input-2')).toBeVisible()
+    await expect(groupNode.locator('.vue-flow__handle-output-2')).toBeVisible()
+    await expect(groupNode.locator('.vue-flow__handle-internal-output-2')).toBeVisible()
+
+    const portIds = await page.evaluate(() => {
+      const node = (window as any).__PIPELINE__.nodes.value.find((item: any) => item.type === 'group')
+      return {
+        inputs: node.data.inputs.map((port: any) => port.id),
+        outputs: node.data.outputs.map((port: any) => port.id)
+      }
+    })
+    expect(portIds.inputs).toEqual(['input', 'input-1', 'input-2'])
+    expect(portIds.outputs).toEqual(['output', 'output-1', 'output-2'])
 
     await expect(groupNode.locator('.vue-flow__handle-internal-output')).toBeVisible()
     await expect(groupNode.locator('.vue-flow__handle-output')).toBeVisible()
