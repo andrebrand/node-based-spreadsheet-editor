@@ -100,6 +100,7 @@ const steps: Record<string, DecisionStep> = {
     question: 'Wie soll der passende Wert ausgewählt werden?',
     options: [
       { label: 'Den ersten ausgefüllten Wert verwenden', description: 'Zum Beispiel Handynummer, sonst Festnetz; optional mit einem Ersatzwert.', result: 'coalesce' },
+      { label: 'Einen Wert anhand einer Schlüssel-Wert-Liste umwandeln', description: 'Zum Beispiel Statuscodes in lesbare Bezeichnungen übersetzen.', result: 'mapping' },
       { label: 'Je nach Ergebnis einer Prüfung einen von zwei Werten wählen', description: 'Zum Beispiel: Wenn der Wert passt, nimm A, sonst nimm B.', result: 'if' },
       { label: 'Zählen, wie oft ein Wert oder eine Wertekombination vorkommt', result: 'uniqueCount' }
     ]

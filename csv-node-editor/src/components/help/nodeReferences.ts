@@ -6,6 +6,7 @@ export type NodeReferenceKey =
   | 'compare'
   | 'if'
   | 'coalesce'
+  | 'mapping'
   | 'counter'
   | 'uniqueCount'
 
@@ -236,6 +237,28 @@ export const nodeReferences: Record<NodeReferenceKey, NodeReference> = {
         { source: 'node_input', sourceHandle: 'Handy', target: 'coalesce', targetHandle: 'input-0' },
         { source: 'node_input', sourceHandle: 'Festnetz', target: 'coalesce', targetHandle: 'input-1' },
         { source: 'coalesce', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-Telefon' }
+      ]
+    }
+  },
+  mapping: {
+    title: 'Mapping Node',
+    summary: 'Ordnet einem Schlüsselwert einen festgelegten Ausgabewert zu.',
+    useCase: 'Zum Beispiel Statuswerte wie „pending“ und „closed“ in lesbare Bezeichnungen umwandeln.',
+    inputs: ['Input: der Wert, für den ein passender Schlüssel gesucht wird.', 'Füge beliebig viele Schlüssel-Wert-Paare hinzu.'],
+    outputs: ['Der Wert des ersten passenden Schlüssels. Ohne Treffer bleibt die Ausgabe leer.'],
+    note: 'Aktiviere „Case insensitive“, um Groß- und Kleinschreibung zu ignorieren. „Swap keys and values“ tauscht die beiden Spalten aller Paare.',
+    example: {
+      inputHeaders: ['Status'],
+      inputRows: [['pending'], ['CLOSED'], ['unknown']],
+      detail: 'Case insensitive: an · Schlüssel-Wert-Paare: pending → In progress, closed → Done',
+      outputHeaders: ['Status label'],
+      outputRows: [['In progress'], ['Done'], ['']],
+      canvasNodes: [
+        { id: 'mapping', type: 'mapping', data: { pairs: [{ key: 'pending', value: 'In progress' }, { key: 'closed', value: 'Done' }], caseInsensitive: true, label: 'Mapping: Status' } }
+      ],
+      canvasEdges: [
+        { source: 'node_input', sourceHandle: 'Status', target: 'mapping', targetHandle: 'input' },
+        { source: 'mapping', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-Status label' }
       ]
     }
   },

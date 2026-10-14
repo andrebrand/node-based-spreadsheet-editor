@@ -18,6 +18,7 @@
           <button @click="addCounterNode(); closeMenu()">💯 Counter Node</button>
           <button @click="addUniqueCountNode(); closeMenu()">🔢 Unique Count Node</button>
           <button @click="addCoalesceNode(); closeMenu()">🔀 Coalesce Node</button>
+          <button @click="addMappingNode(); closeMenu()">🗺 Mapping Node</button>
           <button @click="addCompareNode(); closeMenu()">⚖ Compare Node</button>
           <button @click="addIfNode(); closeMenu()">✅ If Node</button>
           <button @click="addGroupNode(); closeMenu()">🔳 Group Node</button>
@@ -190,6 +191,7 @@ function addRecommendedNode(nodeKey: NodeReferenceKey) {
     compare: addCompareNode,
     if: addIfNode,
     coalesce: addCoalesceNode,
+    mapping: addMappingNode,
     counter: addCounterNode,
     uniqueCount: addUniqueCountNode
   }
@@ -219,6 +221,7 @@ import SplitNode from './nodes/SplitNode.vue'
 import CounterNode from './nodes/CounterNode.vue'
 import UniqueCountNode from './nodes/UniqueCountNode.vue'
 import CoalesceNode from './nodes/CoalesceNode.vue'
+import MappingNode from './nodes/MappingNode.vue'
 import CompareNode from './nodes/CompareNode.vue'
 import IfNode from './nodes/IfNode.vue'
 import GroupNode from './nodes/GroupNode.vue'
@@ -385,6 +388,7 @@ const nodeTypes: NodeTypesObject = {
   uniqueCountNode: markRaw(UniqueCountNode),
   uniqueCount: markRaw(UniqueCountNode),
   coalesce: markRaw(CoalesceNode),
+  mapping: markRaw(MappingNode),
   compare: markRaw(CompareNode),
   if: markRaw(IfNode),
   group: markRaw(GroupNode),
@@ -819,6 +823,20 @@ function addCoalesceNode() {
     label: 'Coalesce',
     position: getSpawnPosition(180, 160),
     data: { inputCount: 2 }
+  })
+}
+
+function addMappingNode() {
+  const id = `mapping_${Date.now()}`
+  nodes.value.push({
+    id,
+    type: 'mapping',
+    label: 'Mapping',
+    position: getSpawnPosition(260, 240),
+    data: {
+      pairs: [{ key: '', value: '' }, { key: '', value: '' }],
+      caseInsensitive: false
+    }
   })
 }
 

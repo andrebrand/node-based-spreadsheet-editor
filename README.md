@@ -183,6 +183,19 @@ Additional input ports can be added when more values should be included in the c
 
 Checks several inputs and returns the first non-empty value. Use it to provide fallback values when a preferred column is blank.
 
+### Mapping Node
+
+Converts an input value using a list of key/value pairs. Add pairs with `+ Pair`; unmatched inputs produce an empty output. Enable `Case insensitive` to ignore letter case, or use `Swap keys and values` to reverse every pair.
+
+To add several pairs at once, paste into an empty Key field. Each line must contain one pair, with its key and value separated by a tab or semicolon. For example, copied spreadsheet cells can be tab-separated:
+
+```text
+red<TAB>rouge
+blue<TAB>bleu
+```
+
+The pasted rows replace the pairs starting at that Key field. Single-line or malformed pastes are not treated as a pair list.
+
 ### Join Node
 
 Collects several text inputs into an array. Add input ports when more values should be included.

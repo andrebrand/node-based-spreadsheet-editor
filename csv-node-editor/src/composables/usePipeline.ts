@@ -283,6 +283,23 @@ export const outputTable = computed(() => {
       })
     }
 
+    if (sourceNode.type === 'mapping') {
+      const inputStream = getStreamForHandle(sourceNode.id, 'input', context)
+      const pairs = sourceNode.data?.pairs || []
+      const caseInsensitive = Boolean(sourceNode.data?.caseInsensitive)
+
+      return inputStream.map((value) => {
+        const input = String(value ?? '')
+        const match = pairs.find((pair: { key?: unknown }) => {
+          const key = String(pair?.key ?? '')
+          return caseInsensitive
+            ? key.toLowerCase() === input.toLowerCase()
+            : key === input
+        })
+        return String(match?.value ?? '')
+      })
+    }
+
     // 2. Regex Node: Transforms the input
     if (sourceNode.type === 'regex') {
       const inputStream = getStreamForHandle(sourceNode.id, 'input', context)
