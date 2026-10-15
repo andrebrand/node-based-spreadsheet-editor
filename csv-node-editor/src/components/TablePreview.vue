@@ -34,14 +34,22 @@
         </thead>
         <tbody>
           <tr v-for="(row, i) in previewTable.rows" :key="i">
-            <td v-for="header in previewTable.headers" :key="header">
+            <td
+              v-for="header in previewTable.headers"
+              :key="header"
+              @dblclick.stop="previewSource === 'input' && startEditingCell(i, header, row[header])"
+            >
               <input
-                v-if="previewSource === 'input'"
+                v-if="isEditingCell(i, header)"
+                ref="editingInput"
                 class="table-cell-input"
                 type="text"
                 :aria-label="`Row ${i + 1}, ${header}`"
-                :value="row[header] ?? ''"
-                @input="updateInputCell(i, header, $event)"
+                :value="editingValue"
+                @input="setEditingValue($event)"
+                @blur="commitInputCell"
+                @keydown.enter.prevent="commitInputCell"
+                @keydown.esc.prevent="cancelInputCell"
               />
               <template v-else>{{ row[header] }}</template>
             </td>
@@ -57,7 +65,7 @@
 
 <script setup lang="ts">
 import * as XLSX from 'xlsx'
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { outputTable, previewSource, rawData } from '../composables/usePipeline'
 import SwitchButton from './core/SwitchButton.vue'
 import { IconLayoutSidebarRightInactive, IconLayoutBottombarInactive } from '@tabler/icons-vue'
@@ -80,15 +88,44 @@ const previewTable = computed(() => previewSource.value === 'input'
   : outputTable.value
 )
 
-function updateInputCell(rowIndex: number, header: string, event: Event) {
-  const value = (event.target as HTMLInputElement).value
+const editingCell = ref<{ rowIndex: number; header: string } | null>(null)
+const editingValue = ref('')
+const editingInput = ref<HTMLInputElement | null>(null)
+
+function isEditingCell(rowIndex: number, header: string) {
+  return editingCell.value?.rowIndex === rowIndex && editingCell.value?.header === header
+}
+
+function startEditingCell(rowIndex: number, header: string, value: unknown) {
+  editingCell.value = { rowIndex, header }
+  editingValue.value = String(value ?? '')
+  void nextTick(() => editingInput.value?.focus())
+}
+
+function setEditingValue(event: Event) {
+  editingValue.value = (event.target as HTMLInputElement).value
+}
+
+function commitInputCell() {
+  const cell = editingCell.value
+  if (!cell) return
+
+  editingCell.value = null
+  if (String(rawData.value.rows[cell.rowIndex]?.[cell.header] ?? '') === editingValue.value) return
+
   rawData.value = {
     ...rawData.value,
     rows: rawData.value.rows.map((row, index) => (
-      index === rowIndex ? { ...row, [header]: value } : row
+      index === cell.rowIndex ? { ...row, [cell.header]: editingValue.value } : row
     ))
   }
 }
+
+function cancelInputCell() {
+  editingCell.value = null
+}
+
+watch(previewSource, cancelInputCell)
 
 function escapeCsvValue(value: unknown) {
   const text = String(value ?? '')
