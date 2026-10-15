@@ -13,6 +13,7 @@
     <span v-else class="node-title-text" @dblclick.stop="startEdit">
       {{ label || defaultLabel }}
     </span>
+    <slot />
   </div>
 </template>
 

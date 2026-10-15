@@ -13,7 +13,7 @@ test('spawns compact presets and expands the same preset into a group', async ({
       data: {
         inputs: [{ id: 'input', internalId: 'internal-input', defaultName: 'Input' }],
         outputs: [{ id: 'output', internalId: 'internal-output', defaultName: 'Output' }],
-        portNames: { input: 'Source value', output: 'Extracted value' }
+        portNames: { input: 'Value', output: 'Result' }
       }
     },
     childNodes: [
@@ -42,7 +42,12 @@ test('spawns compact presets and expands the same preset into a group', async ({
     headers: ['Value', 'Result'],
     rows: [{ Value: 'Order 42', Result: '' }, { Value: 'Item 7', Result: '' }],
     nodes: [
-      { id: 'node_input', type: 'input', position: { x: 50, y: 100 }, data: { columns: ['Value', 'Result'] } },
+      {
+        id: 'node_input',
+        type: 'input',
+        position: { x: 50, y: 100 },
+        data: { fileName: 'values.csv', headers: ['Value', 'Result'] }
+      },
       { id: 'node_output', type: 'output', position: { x: 700, y: 100 }, data: { columns: ['Result'] } }
     ],
     edges: []
@@ -59,24 +64,34 @@ test('spawns compact presets and expands the same preset into a group', async ({
 
   const compactNode = page.locator('.preset-node')
   await expect(compactNode).toBeVisible()
-  await expect(compactNode.locator('.port-row.left .port-label-text')).toHaveText('Source value')
-  await expect(compactNode.locator('.port-row.right .port-label-text')).toHaveText('Extracted value')
+  await expect(compactNode.locator('.port-row.left .port-label-text')).toHaveText('Value')
+  await expect(compactNode.locator('.port-row.right .port-label-text')).toHaveText('Result')
   await expect(compactNode.locator('.vue-flow__handle-input')).toBeVisible()
   await expect(compactNode.locator('.vue-flow__handle-output')).toBeVisible()
 
-  await page.evaluate(() => {
+  await compactNode.getByRole('button', { name: 'Auto-connect or disconnect preset ports' }).click()
+
+  await expect.poll(() => page.evaluate(() => {
     const pipeline = (window as any).__PIPELINE__
     const compact = pipeline.nodes.value.find((node: any) => node.type === 'preset')
-    pipeline.edges.value.push(
-      { id: 'compact-input', source: 'node_input', target: compact.id, sourceHandle: 'Value', targetHandle: 'input' },
-      { id: 'compact-output', source: compact.id, target: 'node_output', sourceHandle: 'output', targetHandle: 'target-Result' }
-    )
-  })
+    return pipeline.edges.value.filter((edge: any) => (
+      edge.source === compact.id || edge.target === compact.id
+    )).length
+  })).toBe(2)
 
   const rows = page.locator('.table-preview table tbody tr')
   await expect(rows).toHaveCount(2)
   await expect(rows.nth(0)).toContainText('42')
   await expect(rows.nth(1)).toContainText('7')
+
+  await compactNode.getByRole('button', { name: 'Auto-connect or disconnect preset ports' }).click()
+  await expect.poll(() => page.evaluate(() => {
+    const pipeline = (window as any).__PIPELINE__
+    const compact = pipeline.nodes.value.find((node: any) => node.type === 'preset')
+    return pipeline.edges.value.filter((edge: any) => (
+      edge.source === compact.id || edge.target === compact.id
+    )).length
+  })).toBe(0)
 
   await page.getByRole('button', { name: /Presets \(1\)/ }).click()
   await page.locator('.preset-expand-btn').click()

@@ -34,7 +34,17 @@
         </thead>
         <tbody>
           <tr v-for="(row, i) in previewTable.rows" :key="i">
-            <td v-for="header in previewTable.headers" :key="header">{{ row[header] }}</td>
+            <td v-for="header in previewTable.headers" :key="header">
+              <input
+                v-if="previewSource === 'input'"
+                class="table-cell-input"
+                type="text"
+                :aria-label="`Row ${i + 1}, ${header}`"
+                :value="row[header] ?? ''"
+                @input="updateInputCell(i, header, $event)"
+              />
+              <template v-else>{{ row[header] }}</template>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -69,6 +79,16 @@ const previewTable = computed(() => previewSource.value === 'input'
   ? { headers: rawData.value.headers, rows: rawData.value.rows }
   : outputTable.value
 )
+
+function updateInputCell(rowIndex: number, header: string, event: Event) {
+  const value = (event.target as HTMLInputElement).value
+  rawData.value = {
+    ...rawData.value,
+    rows: rawData.value.rows.map((row, index) => (
+      index === rowIndex ? { ...row, [header]: value } : row
+    ))
+  }
+}
 
 function escapeCsvValue(value: unknown) {
   const text = String(value ?? '')

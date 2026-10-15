@@ -1,6 +1,20 @@
 <template>
   <div class="custom-node preset-node">
-    <NodeTitle v-model:label="data.label" :default-label="data.preset?.name || 'Preset'" />
+    <NodeTitle
+      v-model:label="data.label"
+      :default-label="data.preset?.name || 'Preset'"
+      header-class="node-header preset-node-header"
+    >
+      <button
+        class="output-pin-btn nodrag"
+        type="button"
+        title="Auto-connect or disconnect all matching preset ports"
+        aria-label="Auto-connect or disconnect preset ports"
+        @click.stop="autoConnectAllPorts"
+      >
+        ↔
+      </button>
+    </NodeTitle>
     <div class="node-body">
       <div v-for="port in inputs" :key="port.id" class="port-row left">
         <Handle :id="port.id" type="target" :position="Position.Left" />
@@ -32,6 +46,7 @@ import type { NodeProps } from '@vue-flow/core'
 import NodeTitle from './NodeTitle.vue'
 import PortLabel from './PortLabel.vue'
 import { setNodePortName } from '../../composables/usePortNames'
+import { autoConnectPort } from '../../composables/useAutoConnect'
 import type { PresetPort } from '../../composables/usePresets'
 
 const props = defineProps<NodeProps<{
@@ -52,6 +67,15 @@ function setPortName(portId: string, newName: string) {
 
 function deleteNode() {
   removeNodes([props.id])
+}
+
+function autoConnectAllPorts() {
+  inputs.value.forEach((port) => {
+    autoConnectPort({ nodeId: props.id, handleId: port.id, type: 'target' })
+  })
+  outputs.value.forEach((port) => {
+    autoConnectPort({ nodeId: props.id, handleId: port.id, type: 'source' })
+  })
 }
 </script>
 
