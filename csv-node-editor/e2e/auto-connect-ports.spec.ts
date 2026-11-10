@@ -1,5 +1,42 @@
 import { test, expect } from '@playwright/test'
 
+test('dims unconnected input and output ports', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: '+ Functions' }).click()
+  await page.getByRole('button', { name: '💫 RegEx Node' }).click()
+  await page.getByRole('button', { name: '+ Functions' }).click()
+  await page.getByRole('button', { name: '🆎 String Node' }).click()
+
+  const regexNode = page.locator('.custom-node.transform-node')
+  const stringNode = page.locator('.custom-node.string-node')
+  const inputHandle = regexNode.locator('.vue-flow__handle-input')
+  const outputHandle = stringNode.locator('.vue-flow__handle-output')
+
+  await expect(inputHandle).toHaveClass(/vue-flow__handle-unconnected/)
+  await expect(outputHandle).toHaveClass(/vue-flow__handle-unconnected/)
+  await expect(inputHandle).toHaveCSS('opacity', '0.3')
+  await expect(outputHandle).toHaveCSS('opacity', '0.3')
+
+  await page.evaluate(() => {
+    const pipeline = (window as any).__PIPELINE__
+    const regex = pipeline.nodes.value.find((node: any) => node.type === 'regex')
+    const string = pipeline.nodes.value.find((node: any) => node.type === 'string')
+    pipeline.edges.value.push({
+      id: 'connected-port-test',
+      source: string.id,
+      sourceHandle: 'output',
+      target: regex.id,
+      targetHandle: 'input'
+    })
+  })
+
+  await expect(inputHandle).not.toHaveClass(/vue-flow__handle-unconnected/)
+  await expect(outputHandle).not.toHaveClass(/vue-flow__handle-unconnected/)
+  await expect(inputHandle).toHaveCSS('opacity', '1')
+  await expect(outputHandle).toHaveCSS('opacity', '1')
+})
+
 test('ctrl-click connects matching ports and cycles through free targets', async ({ page }) => {
   await page.goto('/')
 

@@ -159,15 +159,41 @@ const editorContainerRef = ref<HTMLDivElement | null>(null)
 const presetNameInputRef = ref<HTMLInputElement | null>(null)
 const { project, dimensions, getViewport, removeNodes } = useVueFlow({ id: 'flow-editor' })
 
+function updatePortConnectionStyles() {
+  const container = editorContainerRef.value
+  if (!container) return
+
+  const connectedPorts = new Set<string>()
+  ;(edges.value as Edge[]).forEach((edge) => {
+    if (edge.sourceHandle) connectedPorts.add(`${edge.source}:source:${edge.sourceHandle}`)
+    if (edge.targetHandle) connectedPorts.add(`${edge.target}:target:${edge.targetHandle}`)
+  })
+
+  container.querySelectorAll<HTMLElement>('.vue-flow__node .vue-flow__handle').forEach((handle) => {
+    const nodeId = handle.closest('.vue-flow__node')?.getAttribute('data-id')
+    const handleId = handle.getAttribute('data-handleid')
+    const type = handle.classList.contains('source') ? 'source' :
+      handle.classList.contains('target') ? 'target' : null
+    const isConnected = nodeId && handleId && type
+      ? connectedPorts.has(`${nodeId}:${type}:${handleId}`)
+      : false
+
+    handle.classList.toggle('vue-flow__handle-unconnected', !isConnected)
+  })
+}
+
 onMounted(() => {
   editorContainerRef.value?.addEventListener('pointerdown', handlePointerDown, true)
   editorContainerRef.value?.addEventListener('click', handlePortClick, true)
+  nextTick(updatePortConnectionStyles)
 })
 
 onBeforeUnmount(() => {
   editorContainerRef.value?.removeEventListener('pointerdown', handlePointerDown, true)
   editorContainerRef.value?.removeEventListener('click', handlePortClick, true)
 })
+
+watch([nodes, edges], updatePortConnectionStyles, { deep: true, flush: 'post' })
 
 watch(
   () => namingDialog.value.isOpen,

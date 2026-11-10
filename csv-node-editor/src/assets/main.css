@@ -295,6 +295,7 @@ tbody tr:hover { background-color: #f8fafc; }
 
 
 .vue-flow__handle { width: 10px; height: 10px; background: #2563eb; border-radius: 50%; }
+.vue-flow__handle-unconnected { opacity: 0.4; }
 .vue-flow__handle-left { background: #eb8525; }
 .vue-flow__node-input, .vue-flow__node-output {
     width: auto;
