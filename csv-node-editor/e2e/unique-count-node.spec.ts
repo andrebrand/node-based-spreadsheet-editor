@@ -157,4 +157,63 @@ test.describe('UniqueCountNode End-to-End Tests', () => {
     await expect(tableRows.nth(3)).toContainText('20')
     await expect(tableRows.nth(4)).toContainText('15')
   })
+
+  test('counts occurrences separately for each input in Group count mode', async ({ page }) => {
+    await page.goto('/')
+
+    const plan = {
+      version: 1,
+      fileName: 'test.csv',
+      headers: ['Value'],
+      rows: [
+        { Value: 'b' },
+        { Value: 'b' },
+        { Value: 'a' },
+        { Value: 'c' },
+        { Value: 'b' },
+        { Value: 'a' },
+        { Value: 'a' }
+      ],
+      nodes: [
+        { id: 'node_input', type: 'input', position: { x: 50, y: 100 }, data: {} },
+        {
+          id: 'node_unique',
+          type: 'uniqueCountNode',
+          position: { x: 300, y: 100 },
+          data: {
+            startMode: 'manual',
+            startValue: 1,
+            step: 1,
+            inputCount: 1,
+            mode: 'group'
+          }
+        },
+        {
+          id: 'node_output',
+          type: 'output',
+          position: { x: 600, y: 100 },
+          data: { columns: ['Occurrence'] }
+        }
+      ],
+      edges: [
+        { id: 'e1', source: 'node_input', sourceHandle: 'Value', target: 'node_unique', targetHandle: 'input-0' },
+        { id: 'e2', source: 'node_unique', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-Occurrence' }
+      ]
+    }
+
+    const fileInput = page.locator('input[type="file"][accept=".json"]')
+    await fileInput.setInputFiles({
+      name: 'group-count-plan.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(plan))
+    })
+
+    await expect(page.locator('.custom-node.unique-count-node select').nth(1)).toHaveValue('group')
+    const tableRows = page.locator('.table-preview table tbody tr')
+    await expect(tableRows).toHaveCount(7)
+    const expectedCounts = ['1', '2', '1', '1', '3', '2', '3']
+    for (const [index, count] of expectedCounts.entries()) {
+      await expect(tableRows.nth(index)).toContainText(count)
+    }
+  })
 })

@@ -38,6 +38,7 @@
         <select v-model="data.mode" class="nodrag">
           <option value="id">Unique ID</option>
           <option value="running">Running count</option>
+          <option value="group">Group count</option>
         </select>
       </div>
 
@@ -92,7 +93,7 @@ const props = defineProps<NodeProps<{
   startValue: number
   step: number
   inputCount: number
-  mode?: 'id' | 'running'
+  mode?: 'id' | 'running' | 'group'
   label?: string
   portNames?: Record<string, string>
 }>>()

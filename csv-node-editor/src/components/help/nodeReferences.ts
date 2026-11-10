@@ -373,6 +373,20 @@ export const nodeReferences: Record<NodeReferenceKey, NodeReference> = {
     },
     additionalExamples: [
       {
+        inputHeaders: ['Wert'],
+        inputRows: [['b'], ['b'], ['a'], ['c'], ['b'], ['a'], ['a']],
+        detail: 'Im Gruppen-Zählmodus wird jedes Vorkommen pro Wert gezählt.',
+        outputHeaders: ['Vorkommen'],
+        outputRows: [['1'], ['2'], ['1'], ['1'], ['3'], ['2'], ['3']],
+        canvasNodes: [
+          { id: 'unique-count', type: 'uniqueCountNode', data: { startMode: 'manual', startValue: 1, step: 1, inputCount: 1, mode: 'group', label: 'Unique Count: Gruppen zählen' } }
+        ],
+        canvasEdges: [
+          { source: 'node_input', sourceHandle: 'Wert', target: 'unique-count', targetHandle: 'input-0' },
+          { source: 'unique-count', sourceHandle: 'output', target: 'node_output', targetHandle: 'target-Vorkommen' }
+        ]
+      },
+      {
         inputHeaders: ['Ort', 'Produkt'],
         inputRows: [['Berlin', 'Tee'], ['Berlin', 'Kaffee'], ['Hamburg', 'Tee'], ['Berlin', 'Tee']],
         detail: 'Die Kombination aus Ort und Produkt erhält eine eindeutige ID.',

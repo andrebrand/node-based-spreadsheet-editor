@@ -116,12 +116,19 @@ export const outputTable = computed(() => {
       ))
 
       const seenMap = new Map<string, number>()
+      const groupCounts = new Map<string, number>()
       let uniqueIndex = 0
       let lastAssigned = startBase
 
       return rawData.value.rows.map((_, rowIndex) => {
         const combo = inputStreams.map((stream) => String(stream[rowIndex] ?? ''))
         const key = JSON.stringify(combo)
+
+        if (mode === 'group') {
+          const count = (groupCounts.get(key) ?? 0) + 1
+          groupCounts.set(key, count)
+          return String(startBase + (count - 1) * increment)
+        }
 
         if (seenMap.has(key)) {
           if (mode === 'running') {
